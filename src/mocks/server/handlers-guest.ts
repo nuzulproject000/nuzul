@@ -124,6 +124,22 @@ route("GET", "/hotels/:id/reviews", ({ params, query }) => {
 
 /* ----------------------------------------------------------------- Me */
 route("GET", "/me", () => getDb().users.find((u) => u.id === CURRENT_GUEST_ID));
+route("PATCH", "/me", ({ body }) => {
+  const u = getDb().users.find((x) => x.id === CURRENT_GUEST_ID)!;
+  const patch = body as Partial<typeof u>;
+  const e: Record<string, string> = {};
+  if (patch.name !== undefined && !patch.name.trim()) e.name = "Name is required";
+  if (patch.email !== undefined && !/^\S+@\S+\.\S+$/.test(patch.email)) e.email = "Enter a valid email address";
+  if (patch.phone !== undefined && patch.phone.replace(/\D/g, "").length < 8) e.phone = "Enter a valid phone number";
+  if (Object.keys(e).length) throw invalid(e);
+  Object.assign(u, { name: patch.name ?? u.name, email: patch.email ?? u.email, phone: patch.phone ?? u.phone, city: patch.city ?? u.city });
+  persist(); return u;
+});
+route("GET", "/me/reviews", () => {
+  const db = getDb();
+  const mine = new Set(db.bookings.filter((b) => b.guestId === CURRENT_GUEST_ID).map((b) => b.id));
+  return db.reviews.filter((r) => r.bookingId && mine.has(r.bookingId));
+});
 route("GET", "/me/match-profile", () => getDb().profile);
 route("PUT", "/me/match-profile", ({ body }) => { const db = getDb(); db.profile = { ...db.profile, ...(body as object) }; persist(); return db.profile; });
 route("POST", "/me/match-profile/reset", () => { const db = getDb(); db.profile = { ...DEFAULT_PROFILE, priorities: [], atmosphere: [], facilities: [], saved: false }; persist(); return db.profile; });

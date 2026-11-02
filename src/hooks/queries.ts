@@ -51,6 +51,11 @@ export const useReviews = (id: string, sort: ReviewSort, page: number) => useQue
 
 /* ------------------------------------------------------ Match profile */
 export const useMe = () => useQuery({ queryKey: qk.me, queryFn: meService.get });
+export const useMyReviews = () => useQuery({ queryKey: ["me", "reviews"], queryFn: meService.reviews });
+export function useUpdateMe() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: meService.update, onSuccess: (u) => qc.setQueryData(qk.me, u) });
+}
 export const useMatchProfile = () => useQuery({ queryKey: qk.profile, queryFn: meService.profile });
 export const useQuestions = () => useQuery({ queryKey: qk.questions, queryFn: matchService.questions });
 export const useMatchConfig = () => useQuery({ queryKey: qk.matchConfig, queryFn: matchService.config });

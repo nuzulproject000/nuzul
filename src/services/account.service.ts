@@ -1,4 +1,4 @@
-import type { AppNotification, Booking, Conversation, Message, NotificationPrefs, User, Wishlist } from "@/types/models";
+import type { AppNotification, Review, Booking, Conversation, Message, NotificationPrefs, User, Wishlist } from "@/types/models";
 import type { CancelBookingResponse, ChangeRequest, CreateBookingRequest, Session } from "@/types/api";
 import type { MatchConfig, MatchProfile } from "@/lib/match-engine";
 import type { Question } from "./questions";
@@ -6,6 +6,8 @@ import { api, unwrap } from "./api-client";
 
 export const meService = {
   get: () => unwrap<User>(api.get("/me")),
+  update: (patch: Partial<Pick<User, "name" | "email" | "phone" | "city">>) => unwrap<User>(api.patch("/me", patch)),
+  reviews: () => unwrap<Review[]>(api.get("/me/reviews")),
   profile: () => unwrap<MatchProfile>(api.get("/me/match-profile")),
   saveProfile: (p: Partial<MatchProfile>) => unwrap<MatchProfile>(api.put("/me/match-profile", p)),
   resetProfile: () => unwrap<MatchProfile>(api.post("/me/match-profile/reset")),

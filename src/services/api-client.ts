@@ -3,7 +3,6 @@
  * VITE_API_BASE_URL to a real server and no UI code needs to change. */
 import axios, { AxiosError } from "axios";
 import type { ApiError } from "@/types/api";
-import { mockAdapter } from "@/mocks/server";
 
 const useMocks = import.meta.env.VITE_USE_MOCKS !== "false";
 
@@ -11,7 +10,8 @@ export const api = axios.create({
   baseURL: useMocks ? "/v1" : import.meta.env.VITE_API_BASE_URL,
   timeout: 15000,
   headers: { "Content-Type": "application/json" },
-  adapter: useMocks ? mockAdapter : undefined,
+  // Lazily loaded so production builds with a real API never ship the mock backend.
+  adapter: useMocks ? (config) => import("@/mocks/server").then((m) => m.mockAdapter(config)) : undefined,
 });
 
 api.interceptors.request.use((config) => {

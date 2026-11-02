@@ -12,7 +12,7 @@ import { useCategories, useCollection, useDestinations, useHotel, useMatchProfil
 import type { CollectionKind } from "@/services/catalog.service";
 import { useSearch } from "@/stores/search.store";
 import { categoryIcon } from "@/lib/icons";
-import { photos } from "@/mocks/hotels";
+import { photos } from "@/lib/imagery";
 import { hotelPath } from "@/app/paths";
 import { cn } from "@/lib/utils";
 
