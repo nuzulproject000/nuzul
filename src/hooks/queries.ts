@@ -46,6 +46,8 @@ export const useCollection = (k: CollectionKind) => useQuery({ queryKey: qk.coll
 export const useHotel = (id: string) => useQuery({ queryKey: qk.hotel(id), queryFn: () => hotelsService.get(id), enabled: !!id });
 export const useHotelBySlug = (slug: string) => useQuery({ queryKey: qk.hotelSlug(slug), queryFn: () => hotelsService.bySlug(slug), enabled: !!slug });
 export const useCompareHotels = (ids: string[]) => useQuery({ queryKey: qk.compare(ids), queryFn: () => hotelsService.compare(ids), enabled: ids.length > 0 });
+/** Batch fetch (wishlists etc.) — same contract as compare. */
+export const useHotelsByIds = (ids: string[]) => useQuery({ queryKey: ["hotels", "batch", ids], queryFn: () => hotelsService.compare(ids), enabled: ids.length > 0, placeholderData: keepPreviousData });
 export const useFlexibleDates = (id: string, checkIn: string, nights: number, enabled = true) => useQuery({ queryKey: qk.flex(id, checkIn, nights), queryFn: () => hotelsService.flexibleDates(id, checkIn, nights), enabled: enabled && !!id });
 export const useReviews = (id: string, sort: ReviewSort, page: number) => useQuery({ queryKey: qk.reviews(id, sort, page), queryFn: () => hotelsService.reviews(id, sort, page), placeholderData: keepPreviousData });
 
