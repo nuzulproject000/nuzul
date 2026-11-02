@@ -90,7 +90,7 @@ export default function ResultsPage() {
         </div>
       )}
 
-      <div className={cn(view === "split" ? "grid grid-cols-[minmax(640px,58%)_1fr] max-lg:grid-cols-[minmax(480px,62%)_1fr] max-md:block" : "block")}>
+      <div className={cn(view === "split" ? "grid grid-cols-[minmax(640px,58%)_1fr] max-xl:grid-cols-[minmax(560px,60%)_1fr] max-lg:block" : "block")}>
         <section className={cn("px-12 pt-9 pb-28 max-md:px-4 max-md:pt-6", view === "map" && "hidden")} aria-busy={isFetching}>
           <div className="mb-7 flex items-end justify-between gap-5 max-md:flex-col max-md:items-start">
             <div>
@@ -110,15 +110,15 @@ export default function ResultsPage() {
           {isMonthly && <div className="mb-6 flex items-start gap-2.5 bg-soft px-4 py-3.5 text-[12px] leading-relaxed text-navy"><CalendarDays className="size-[18px] shrink-0 text-gold" /><span><b>{t("results.monthly")}</b> · {t("results.monthlyText")}</span></div>}
 
           {error ? <ErrorState title={t("results.error")} error={error} onRetry={() => void refetch()} />
-            : isLoading ? <div className={cn("grid gap-x-5 gap-y-9", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-lg:grid-cols-1")}>{Array.from({ length: 4 }, (_, i) => <CardSkeleton key={i} />)}</div>
+            : isLoading ? <div className={cn("grid gap-x-5 gap-y-9", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-md:grid-cols-1")}>{Array.from({ length: 4 }, (_, i) => <CardSkeleton key={i} />)}</div>
               : items.length === 0 ? <EmptyState icon={<Search />} title={t("results.empty")} text={t("results.emptyText")} action={t("common.clearAll")} onAction={() => { setFilters(EMPTY_FILTERS); setArea(null); }} />
-                : <div className={cn("grid gap-x-5 gap-y-9 transition-opacity", isFetching && "opacity-60", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-lg:grid-cols-1")}>
+                : <div className={cn("grid gap-x-5 gap-y-9 transition-opacity", isFetching && "opacity-60", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-md:grid-cols-1")}>
                   {items.map((h) => <HotelCard key={h.id} hotel={h} nights={nights} monthly={isMonthly} showCompare highlighted={hover === h.id || selected === h.id} onHover={setHover} />)}
                 </div>}
           {data && !area && <Pagination page={data.page} totalPages={data.totalPages} onChange={(p) => { write({ page: p }, false); window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
         </section>
         {view !== "list" && (
-          <aside className={cn("sticky top-[78px] h-[calc(100vh-78px)]", view === "split" && "max-md:hidden", view === "map" && "h-[calc(100vh-230px)] max-md:h-[calc(100vh-260px)]")}>
+          <aside className={cn("sticky top-[78px] h-[calc(100vh-78px)]", view === "split" && "max-lg:hidden", view === "map" && "h-[calc(100vh-230px)] max-md:h-[calc(100vh-260px)]")}>
             <Suspense fallback={<div className="skeleton h-full" />}>
               <ResultsMap focus={dest} hotels={items} hoverId={hover} selectedId={selected} onSelect={setSelected} onSearchArea={setArea} />
             </Suspense>

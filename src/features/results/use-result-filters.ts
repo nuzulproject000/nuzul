@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { track } from "@/lib/analytics";
 import { useSearchParams } from "react-router-dom";
 import type { HotelSearchParams, SortKey } from "@/types/api";
 import type { PropertyType, RoomType } from "@/types/models";
@@ -44,7 +45,7 @@ export function useResultFilters() {
       return n;
     }, { replace: true });
   };
-  const setFilters = (f: ResultFilters) => write({ ...Object.fromEntries([...LIST_KEYS, ...BOOL_KEYS, ...NUM_KEYS, "roomType", "category"].map((k) => [k, undefined])), ...(f as unknown as Record<string, string | number | boolean | string[] | undefined>) });
+  const setFilters = (f: ResultFilters) => { track("filters_applied"); write({ ...Object.fromEntries([...LIST_KEYS, ...BOOL_KEYS, ...NUM_KEYS, "roomType", "category"].map((k) => [k, undefined])), ...(f as unknown as Record<string, string | number | boolean | string[] | undefined>) }); };
 
   const activeCount = LIST_KEYS.reduce((n, k) => n + filters[k].length, 0) + BOOL_KEYS.filter((k) => filters[k]).length + NUM_KEYS.filter((k) => filters[k] !== undefined).length + (filters.roomType ? 1 : 0) + (filters.category ? 1 : 0);
 

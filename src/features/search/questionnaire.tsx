@@ -1,4 +1,5 @@
 /* Match Questionnaire (§6–7). Questions come from the Admin-configured set. */
+import { track } from "@/lib/analytics";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -51,7 +52,7 @@ export function Questionnaire() {
       if (qq.type === "MULTI") (patch as Record<string, unknown>)[qq.field] = v;
       else if (v[0]) (patch as Record<string, unknown>)[qq.field] = v[0];
     });
-    save.mutate(patch, { onSuccess: () => { toast.success(t("profile.prefsSaved")); navigate("/search?sort=MATCH"); } });
+    save.mutate(patch, { onSuccess: () => { track("questionnaire_complete"); toast.success(t("profile.prefsSaved")); navigate("/search?sort=MATCH"); } });
   };
 
   return (

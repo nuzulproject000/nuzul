@@ -7,6 +7,7 @@ import type { Question } from "@/services/questions";
 import { catalogService, hotelsService, type CollectionKind } from "@/services/catalog.service";
 import { bookingService, matchService, meService, messagingService, notificationService, wishlistService, type MessagingScope } from "@/services/account.service";
 import { adminService, hostService } from "@/services/ops.service";
+import { track } from "@/lib/analytics";
 
 export const qk = {
   categories: ["categories"] as const,
@@ -83,17 +84,17 @@ function useWl<TVars, TRes>(fn: (v: TVars) => Promise<TRes>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSettled: () => qc.invalidateQueries({ queryKey: qk.wishlists }) });
 }
-export const useCreateWishlist = () => useWl((name: string) => wishlistService.create(name));
+export const useCreateWishlist = () => useWl((name: string) => { track("wishlist_create"); return wishlistService.create(name); });
 export const useUpdateWishlist = () => useWl(({ id, patch }: { id: string; patch: Partial<Pick<Wishlist, "name" | "privacy">> }) => wishlistService.update(id, patch));
 export const useDeleteWishlist = () => useWl((id: string) => wishlistService.remove(id));
 export const useMoveWishlistItem = () => useWl(({ id, hotelId, toId }: { id: string; hotelId: string; toId: string }) => wishlistService.move(id, hotelId, toId));
 export const useRemoveWishlistItem = () => useWl(({ id, hotelId }: { id: string; hotelId: string }) => wishlistService.removeItem(id, hotelId));
-export const useInviteCollaborator = () => useWl(({ id, email }: { id: string; email: string }) => wishlistService.invite(id, email));
+export const useInviteCollaborator = () => useWl(({ id, email }: { id: string; email: string }) => { track("wishlist_share", { id }); return wishlistService.invite(id, email); });
 /** Quick like with optimistic update (§22). */
 export function useToggleLike() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (hotelId: string) => wishlistService.toggleLike(hotelId),
+    mutationFn: (hotelId: string) => { track("like", { hotelId }); return wishlistService.toggleLike(hotelId); },
     onMutate: async (hotelId) => {
       await qc.cancelQueries({ queryKey: qk.wishlists });
       const prev = qc.getQueryData<Wishlist[]>(qk.wishlists);
@@ -115,12 +116,16 @@ function useBookingMutation<TVars, TRes>(fn: (v: TVars) => Promise<TRes>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSuccess: () => { qc.invalidateQueries({ queryKey: qk.bookings }); qc.invalidateQueries({ queryKey: ["bookings"] }); qc.invalidateQueries({ queryKey: qk.notifications }); qc.invalidateQueries({ queryKey: ["host"] }); qc.invalidateQueries({ queryKey: ["admin"] }); } });
 }
-export const useCreateBooking = () => useBookingMutation(bookingService.create);
-export const useCancelBooking = () => useBookingMutation((id: string) => bookingService.cancel(id));
+export const useCreateBooking = () => useBookingMutation(async (req: Parameters<typeof bookingService.create>[0]) => {
+  track("booking_attempt", { hotelId: req.hotelId, method: req.paymentMethod });
+  try { const b = await bookingService.create(req); track("booking_complete", { hotelId: b.hotelId, id: b.id, total: b.price.total }); return b; }
+  catch (e) { track("booking_failed", { hotelId: req.hotelId }); throw e; }
+});
+export const useCancelBooking = () => useBookingMutation((id: string) => { track("cancellation", { id }); return bookingService.cancel(id); });
 export const useChangeRequest = () => useBookingMutation(({ id, ...req }: { id: string } & Parameters<typeof bookingService.requestChange>[1]) => bookingService.requestChange(id, req));
 export function useSubmitReview() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: ({ id, ...body }: { id: string; categories: Record<string, number>; text: string }) => bookingService.review(id, body), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.bookings }); qc.invalidateQueries({ queryKey: ["reviews"] }); } });
+  return useMutation({ mutationFn: ({ id, ...body }: { id: string; categories: Record<string, number>; text: string }) => { track("review_submit", { id }); return bookingService.review(id, body); }, onSuccess: () => { qc.invalidateQueries({ queryKey: qk.bookings }); qc.invalidateQueries({ queryKey: ["reviews"] }); } });
 }
 
 /* ---------------------------------------------------------- Messaging */

@@ -130,6 +130,11 @@ route("GET", "/hotels/:id/flexible-dates", ({ params, query }) => {
   });
 });
 
+/* ---------------------------------------------------------- Analytics */
+const events: { event: string; props: unknown; at: string }[] = [];
+route("POST", "/events", ({ body }) => { events.unshift(body as (typeof events)[number]); events.length = Math.min(events.length, 500); return { ok: true }; });
+route("GET", "/events", () => events);
+
 /* ------------------------------------------------------------ Reviews */
 route("GET", "/hotels/:id/reviews", ({ params, query }) => {
   const sort = query.get("sort") ?? "RELEVANT";

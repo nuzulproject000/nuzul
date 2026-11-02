@@ -1,4 +1,5 @@
 /* Hotel detail (§18–19, §24–28, §31, §37, §68). */
+import { track } from "@/lib/analytics";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -52,6 +53,7 @@ function HotelView({ hotel: h }: { hotel: HotelWithMatch }) {
   const m = h.match;
   const wantsQuiet = profile?.atmosphere.includes("Quiet");
   useSeo(h);
+  useEffect(() => { track("hotel_view", { hotelId: h.id }); track("match_view", { hotelId: h.id, score: h.match.score }); }, [h.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll-spy for the sticky section tabs.
   useEffect(() => {

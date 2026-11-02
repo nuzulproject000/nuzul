@@ -1,5 +1,6 @@
 /* Main search (§5, §15, §16): destination autocomplete, exact / flexible / monthly
  * dates, adults · children · infants · pets · rooms. Built with React Hook Form + Yup. */
+import { track } from "@/lib/analytics";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -55,6 +56,7 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
   const onSubmit = (v: FormValues) => {
     s.set({ destination: v.destination, checkIn: v.checkIn, checkOut: v.checkOut, mode: v.mode });
     s.commit();
+    track("search", { destination: v.destination, mode: v.mode });
     setOpen("");
     onSubmitted?.();
     navigate(`/search?destination=${encodeURIComponent(v.destination)}${v.mode === "MONTHLY" ? "&mode=monthly" : ""}`);

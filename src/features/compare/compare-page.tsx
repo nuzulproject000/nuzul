@@ -1,4 +1,6 @@
 /* Hotel comparison (§20): up to 4 stays, Match Score and guest rating kept separate, best-in-row. */
+import { track } from "@/lib/analytics";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
@@ -24,6 +26,7 @@ export default function ComparePage() {
   const { data: profile } = useMatchProfile();
   const { data, isLoading, error, refetch } = useCompareHotels(ids);
   const hotels = (data ?? []).filter((h) => ids.includes(h.id));
+  useEffect(() => { if (ids.length >= 2) track("compare", { count: ids.length }); }, [ids.length]);
 
   if (ids.length < 2) return <div className="container-page py-16"><EmptyState icon={<Plus />} title={t("compare.emptyTitle")} text={t("compare.emptyText")} action={t("compare.browse")} onAction={() => navigate("/search")} /></div>;
   if (error) return <div className="container-page py-16"><ErrorState error={error} onRetry={() => void refetch()} /></div>;
