@@ -1,0 +1,15 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { DisplayCurrency, Locale } from "@/types/models";
+
+/** UI preferences that persist on this device (§55–56). */
+type PreferencesState = {
+  locale: Locale;
+  currency: DisplayCurrency;
+  setLocale: (l: Locale) => void;
+  setCurrency: (c: DisplayCurrency) => void;
+};
+
+export const usePreferences = create<PreferencesState>()(
+  persist((set) => ({ locale: "en", currency: "EGP", setLocale: (locale) => set({ locale }), setCurrency: (currency) => set({ currency }) }), { name: "nuzul.preferences" }),
+);

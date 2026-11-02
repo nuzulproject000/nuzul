@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* -----------------------------------------------------------------------
+ * Nuzul design tokens — taken 1:1 from the v2 Figma Make design.
+ * Brand: Navy + Sand. Type: Montserrat (Latin) / Tajawal (Arabic).
+ * shadcn/ui semantic variables are mapped onto these brand tokens so every
+ * primitive inherits the Nuzul look without per-component overrides.
+ * --------------------------------------------------------------------- */
+:root {
+  --navy: #0f1c2e;
+  --sand: #d8b98a;
+  --ivory: #f8f5ef;
+  --charcoal: #252a30;
+  --gold: #b8945b;
+  --gold-ink: #6d5530;
+  --paper: #fffdf8;
+  --muted-ink: #73716d;
+  --line: #ded8cc;
+  --soft: #efe8dc;
+  --success: #315f4d;
+  --success-bg: #e4efe9;
+  --error: #a1473e;
+  --error-bg: #f5e3e0;
+  --warn: #9a6b1f;
+  --warn-bg: #f6ecd9;
+  --dash-bg: #f4f1eb;
+
+  /* shadcn semantic mapping */
+  --background: var(--ivory);
+  --foreground: var(--charcoal);
+  --card: var(--paper);
+  --card-foreground: var(--charcoal);
+  --popover: var(--paper);
+  --popover-foreground: var(--charcoal);
+  --primary: var(--navy);
+  --primary-foreground: #ffffff;
+  --secondary: var(--soft);
+  --secondary-foreground: var(--navy);
+  --muted: var(--soft);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--soft);
+  --accent-foreground: var(--navy);
+  --destructive: var(--error);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: rgb(184 148 91 / 0.45);
+  --radius: 0.5rem;
+  --shadow-lift: 0 18px 48px rgb(15 28 46 / 0.12);
+}
+
+@theme inline {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Tajawal", "Montserrat", sans-serif;
+
+  --color-navy: var(--navy);
+  --color-sand: var(--sand);
+  --color-ivory: var(--ivory);
+  --color-charcoal: var(--charcoal);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-paper: var(--paper);
+  --color-ink-muted: var(--muted-ink);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-dash: var(--dash-bg);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --shadow-lift: var(--shadow-lift);
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+  [dir="rtl"] body, [dir="rtl"] button, [dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] select { font-family: var(--font-arabic); }
+  h1, h2, h3, h4 { @apply text-navy; }
+  h1 { font-size: clamp(2.25rem, 5vw, 4.5rem); letter-spacing: -0.055em; line-height: 1.04; font-weight: 700; }
+  h2 { font-size: clamp(1.75rem, 3.2vw, 2.9rem); letter-spacing: -0.045em; line-height: 1.08; font-weight: 700; }
+  h3 { letter-spacing: -0.025em; font-weight: 700; }
+  p { line-height: 1.7; }
+  :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+  img { display: block; max-width: 100%; }
+}
+
+@layer components {
+  .eyebrow { @apply block text-[11px] font-bold tracking-[0.19em] uppercase text-gold mb-3.5; }
+  .eyebrow-light { @apply text-sand; }
+  .container-page { width: min(1400px, calc(100% - 96px)); margin-inline: auto; }
+  @media (max-width: 1050px) { .container-page { width: calc(100% - 48px); } }
+  @media (max-width: 760px) { .container-page { width: calc(100% - 32px); } }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .skeleton { background: linear-gradient(90deg, #ece6da 0%, #f6f1e8 50%, #ece6da 100%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+}
+
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Leaflet: keep the map under sticky headers and brand the price markers */
+.leaflet-container { font-family: inherit; z-index: 0; background: #d9dfda; }
+.nuzul-marker { background: var(--paper); color: var(--navy); border-radius: 999px; box-shadow: 0 4px 12px rgb(15 28 46 / .2); font: 700 11px/1 var(--font-sans); padding: 8px 10px; white-space: nowrap; transform: translate(-50%, -50%); width: max-content; transition: transform .15s, background .15s; }
+.nuzul-marker.is-active { background: var(--navy); color: #fff; transform: translate(-50%, -50%) scale(1.1); }
+.nuzul-cluster { background: var(--gold); color: #fff; border-radius: 999px; width: 38px; height: 38px; display: grid; place-items: center; font: 700 12px var(--font-sans); box-shadow: 0 0 0 6px rgb(184 148 91 / .25); transform: translate(-50%, -50%); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,190 @@
+/* Seed hotels (spec §87). Illustrative sample data — not live inventory,
+ * prices or reviews. Coordinates are approximate real locations. */
+import type { CancellationPolicy, Currency, Hotel, InsightTopic, NearbyPlace, PropertyType, ReviewCategories, Room } from "@/types/models";
+
+export const photos = {
+  hero: "https://images.unsplash.com/photo-1586611292717-f828b167408c?auto=format&fit=crop&w=1800&q=85",
+  pool: "https://images.unsplash.com/photo-1650965171703-087486b3a1b0?auto=format&fit=crop&w=1400&q=80",
+  coast: "https://images.unsplash.com/photo-1718939050480-a19862c5b3b7?auto=format&fit=crop&w=1400&q=80",
+  room: "https://images.unsplash.com/photo-1760067537740-faa11f7bdf1e?auto=format&fit=crop&w=1400&q=80",
+  lounge: "https://images.unsplash.com/photo-1760067537567-f3e1f8ad7ef7?auto=format&fit=crop&w=1400&q=80",
+  villa: "https://images.unsplash.com/photo-1759472077408-a4cdfd4ff3dd?auto=format&fit=crop&w=1400&q=80",
+  beach: "https://images.unsplash.com/photo-1672421187649-7ee687342e9e?auto=format&fit=crop&w=1400&q=80",
+  sunset: "https://images.unsplash.com/photo-1577563407146-5dca967c5716?auto=format&fit=crop&w=1400&q=80",
+  city: "https://images.unsplash.com/photo-1694968433606-df475600d7b6?auto=format&fit=crop&w=1400&q=80",
+} as const;
+
+const P = photos;
+
+function rooms(hotelId: string, base: number, policy: CancellationPolicy, imgs: [string, string]): Room[] {
+  return [
+    { id: `${hotelId}-dbl`, hotelId, name: "Deluxe Double", type: "DOUBLE", capacity: 2, beds: "1 king bed", bathrooms: 1, sizeM2: 38, nightlyPrice: base, available: 6, totalUnits: 24, cancellationPolicy: policy, minStay: 1, maxStay: 30, amenities: ["Breakfast included", "Free Wi-Fi", "Blackout curtains"], images: [imgs[0]] },
+    { id: `${hotelId}-ste`, hotelId, name: "Junior Suite", type: "SUITE", capacity: 3, beds: "1 king bed + sofa bed", bathrooms: 1, sizeM2: 56, nightlyPrice: Math.round(base * 1.38), available: 2, totalUnits: 8, cancellationPolicy: policy, minStay: 2, maxStay: 30, amenities: ["Terrace", "Lounge access", "Bathtub"], images: [imgs[1]] },
+    { id: `${hotelId}-fam`, hotelId, name: "Family Room", type: "FAMILY", capacity: 4, beds: "2 queen beds", bathrooms: 2, sizeM2: 64, nightlyPrice: Math.round(base * 1.55), available: 3, totalUnits: 10, cancellationPolicy: "MODERATE", minStay: 2, maxStay: 21, amenities: ["Connecting rooms", "Kids club access"], images: [imgs[0]] },
+  ];
+}
+
+type Seed = {
+  id: string; slug: string; name: string; city: string; country: string; area: string; description: string; category: string; propertyType: PropertyType;
+  categories: string[]; rating: number; reviewCount: number; currency: Currency; fromPrice: number; images: string[]; tags: string[]; amenities: string[];
+  accessibility: string[]; atmosphere: string[]; guestFavorite: boolean; verification: Hotel["verification"]; instantBook: boolean; payLater: boolean;
+  cancellationPolicy: CancellationPolicy; available?: boolean; monthlyDiscountPct: number; locationScore: number; distanceKm: number; lat: number; lng: number;
+  cats: ReviewCategories; love: [string, number][]; complain: [string, number][]; noise: number; nearby: NearbyPlace[]; host: Hotel["host"]; roomImgs?: [string, string]; petsAllowed?: boolean;
+};
+
+const build = (s: Seed): Hotel => ({
+  id: s.id, slug: s.slug, name: s.name, city: s.city, country: s.country, area: s.area, description: s.description, category: s.category,
+  propertyType: s.propertyType, categories: s.categories, rating: s.rating, reviewCount: s.reviewCount, currency: s.currency, fromPrice: s.fromPrice,
+  images: s.images, tags: s.tags, amenities: s.amenities, accessibility: s.accessibility, atmosphere: s.atmosphere, guestFavorite: s.guestFavorite,
+  verification: s.verification, instantBook: s.instantBook, payLater: s.payLater, petsAllowed: s.petsAllowed ?? false, cancellationPolicy: s.cancellationPolicy,
+  available: s.available ?? true, monthlyDiscountPct: s.monthlyDiscountPct, locationScore: s.locationScore, distanceKm: s.distanceKm,
+  coordinates: { lat: s.lat, lng: s.lng }, reviewCategories: s.cats,
+  insights: [...s.love.map(([topic, pct]): InsightTopic => ({ topic, pct, sentiment: "positive" })), ...s.complain.map(([topic, pct]): InsightTopic => ({ topic, pct, sentiment: "negative" }))],
+  noiseMentionPct: s.noise, rooms: rooms(s.id, s.fromPrice, s.cancellationPolicy, s.roomImgs ?? [P.room, P.lounge]), nearby: s.nearby, host: s.host,
+  checkIn: "15:00", checkOut: "12:00", status: "LIVE",
+});
+
+const ALL = ["Wi-Fi", "Pool", "Gym", "Spa", "Parking", "Restaurant", "Air conditioning", "Room service", "Laundry", "Beach access", "Elevator"];
+const sharmNearby: NearbyPlace[] = [
+  { name: "Sharm El Sheikh International Airport", kind: "AIRPORT", distanceKm: 9, travelTime: "14 min drive" },
+  { name: "Naama Bay promenade", kind: "SHOPPING", distanceKm: 12, travelTime: "20 min drive" },
+  { name: "Ras Mohammed National Park", kind: "ATTRACTION", distanceKm: 38, travelTime: "45 min drive" },
+  { name: "Nabq Bay beach", kind: "BEACH", distanceKm: 0.2, travelTime: "3 min walk" },
+  { name: "Soho Square", kind: "RESTAURANTS", distanceKm: 6, travelTime: "10 min drive" },
+];
+const cairoNearby: NearbyPlace[] = [
+  { name: "Cairo International Airport", kind: "AIRPORT", distanceKm: 22, travelTime: "35 min drive" },
+  { name: "Egyptian Museum", kind: "LANDMARK", distanceKm: 2.4, travelTime: "8 min drive" },
+  { name: "Saad Zaghloul Metro", kind: "TRANSPORT", distanceKm: 0.9, travelTime: "12 min walk" },
+  { name: "Zamalek galleries & cafés", kind: "SHOPPING", distanceKm: 3.2, travelTime: "10 min drive" },
+  { name: "Giza Pyramids", kind: "LANDMARK", distanceKm: 18, travelTime: "40 min drive" },
+];
+const gounaNearby: NearbyPlace[] = [
+  { name: "Hurghada International Airport", kind: "AIRPORT", distanceKm: 24, travelTime: "25 min drive" },
+  { name: "Abu Tig Marina", kind: "RESTAURANTS", distanceKm: 2.5, travelTime: "6 min drive" },
+  { name: "Mangroovy Beach", kind: "BEACH", distanceKm: 4, travelTime: "8 min drive" },
+  { name: "Downtown El Gouna", kind: "SHOPPING", distanceKm: 3, travelTime: "Shuttle · 10 min" },
+];
+
+export const hotelsSeed: Hotel[] = [
+  build({ id: "h-rixos-seagate", slug: "egypt/sharm-el-sheikh/rixos-premium-seagate", name: "Rixos Premium Seagate", city: "Sharm El Sheikh", country: "Egypt", area: "Nabq Bay",
+    description: "Set along a private stretch of Nabq Bay, Rixos brings together generous gardens, peaceful rooms, and an exceptional collection of pools and dining experiences.",
+    category: "Beach resort", propertyType: "RESORT", categories: ["Beach", "Luxury", "Resorts", "Pools", "Romantic", "Family", "Spa"], rating: 4.8, reviewCount: 892, currency: "EGP", fromPrice: 12400,
+    images: [P.pool, P.room, P.lounge, P.beach, P.sunset], tags: ["Private beach", "Spa", "Quiet rooms"], amenities: ALL, accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible parking"],
+    atmosphere: ["Romantic", "Luxury", "Quiet", "Relaxation"], guestFavorite: true, verification: "PREMIUM_VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "FLEXIBLE", monthlyDiscountPct: 18,
+    locationScore: 88, distanceKm: 14, lat: 27.996, lng: 34.425, cats: { cleanliness: 4.9, location: 4.7, staff: 4.8, comfort: 4.8, facilities: 4.9, value: 4.5 },
+    love: [["Pools", 91], ["Cleanliness", 88], ["Staff", 84]], complain: [["Evening noise in garden rooms", 9], ["Distance to Naama Bay", 14]], noise: 9, nearby: sharmNearby,
+    host: { id: "host-rixos", name: "Rixos Hotels Egypt", responseRate: 99, responseTime: "within an hour", badge: "TOP_HOST" } }),
+  build({ id: "h-fs-sharm", slug: "egypt/sharm-el-sheikh/four-seasons-resort-sharm", name: "Four Seasons Resort Sharm El Sheikh", city: "Sharm El Sheikh", country: "Egypt", area: "Ras Um El Sid",
+    description: "A hillside village of domed villas cascading to a private reef, with some of the Red Sea’s best house reef snorkelling steps from your room.",
+    category: "Luxury resort", propertyType: "RESORT", categories: ["Beach", "Luxury", "Resorts", "Family", "Hotels with views", "Pools"], rating: 4.9, reviewCount: 1430, currency: "EGP", fromPrice: 21800,
+    images: [P.beach, P.villa, P.room, P.pool, P.coast], tags: ["House reef", "Kids club", "Sea views"], amenities: ALL, accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible room"],
+    atmosphere: ["Luxury", "Family", "Relaxation"], guestFavorite: true, verification: "PREMIUM_VERIFIED", instantBook: true, payLater: false, cancellationPolicy: "MODERATE", monthlyDiscountPct: 12,
+    locationScore: 84, distanceKm: 6, lat: 27.957, lng: 34.383, cats: { cleanliness: 4.9, location: 4.6, staff: 4.9, comfort: 4.9, facilities: 4.9, value: 4.2 },
+    love: [["House reef", 93], ["Service", 91], ["Kids club", 82]], complain: [["Price", 26], ["Hilly walks", 15]], noise: 7, nearby: sharmNearby,
+    host: { id: "host-fs", name: "Four Seasons Egypt", responseRate: 98, responseTime: "within an hour", badge: "TOP_HOST" } }),
+  build({ id: "h-alcazar", slug: "egypt/sharm-el-sheikh/steigenberger-alcazar", name: "Steigenberger Alcazar", city: "Sharm El Sheikh", country: "Egypt", area: "Nabq Bay",
+    description: "An adults-friendly resort with a lazy river, a long sandy beach and good-value all-inclusive packages.",
+    category: "Resort", propertyType: "RESORT", categories: ["Beach", "Budget", "Pools", "Resorts"], rating: 4.5, reviewCount: 2210, currency: "EGP", fromPrice: 6900,
+    images: [P.coast, P.pool, P.room, P.sunset, P.beach], tags: ["All-inclusive", "Lazy river", "Value"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Parking", "Restaurant", "Air conditioning", "Beach access", "Laundry"],
+    accessibility: ["Step-free access", "Elevator"], atmosphere: ["Lively", "Family"], guestFavorite: false, verification: "VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "FLEXIBLE", monthlyDiscountPct: 25,
+    locationScore: 80, distanceKm: 15, lat: 28.003, lng: 34.432, cats: { cleanliness: 4.5, location: 4.4, staff: 4.6, comfort: 4.4, facilities: 4.5, value: 4.7 },
+    love: [["Value for money", 89], ["Beach", 84], ["Food variety", 78]], complain: [["Noise", 27], ["Busy pools", 22]], noise: 27, nearby: sharmNearby,
+    host: { id: "host-steig", name: "Steigenberger Hotels", responseRate: 91, responseTime: "within a few hours" } }),
+  build({ id: "h-casa-cook", slug: "egypt/hurghada/casa-cook-el-gouna", name: "Casa Cook El Gouna", city: "Hurghada", country: "Egypt", area: "El Gouna",
+    description: "A sun-washed, adults-only design hotel on the El Gouna lagoon — linen, terracotta and long, unhurried afternoons by the pool.",
+    category: "Design hotel", propertyType: "HOTEL", categories: ["Beach", "Boutique", "Romantic", "Pools", "Hotels with views"], rating: 4.7, reviewCount: 641, currency: "EGP", fromPrice: 9800,
+    images: [P.coast, P.lounge, P.room, P.pool, P.beach], tags: ["Adults only", "Pool", "Wellness"], amenities: ["Wi-Fi", "Pool", "Spa", "Restaurant", "Air conditioning", "Workspace", "Beach access", "Laundry"],
+    accessibility: ["Step-free access", "Accessible bathroom"], atmosphere: ["Romantic", "Quiet", "Relaxation", "Boutique"], guestFavorite: true, verification: "VERIFIED", instantBook: true, payLater: false, cancellationPolicy: "MODERATE", monthlyDiscountPct: 15,
+    locationScore: 82, distanceKm: 22, lat: 27.392, lng: 33.678, cats: { cleanliness: 4.8, location: 4.6, staff: 4.8, comfort: 4.7, facilities: 4.6, value: 4.6 },
+    love: [["Design", 89], ["Calm atmosphere", 86], ["Breakfast", 79]], complain: [["Small rooms", 17], ["Slow Wi-Fi", 12]], noise: 6, nearby: gounaNearby,
+    host: { id: "host-casacook", name: "Casa Cook", responseRate: 97, responseTime: "within an hour", badge: "HIGHLY_RATED_HOST" } }),
+  build({ id: "h-chedi", slug: "egypt/hurghada/the-chedi-el-gouna", name: "The Chedi El Gouna", city: "Hurghada", country: "Egypt", area: "El Gouna",
+    description: "Overwater-style suites, a serene Asian-inspired spa and a quiet lagoon setting make The Chedi one of the Red Sea’s most private retreats.",
+    category: "Luxury retreat", propertyType: "RESORT", categories: ["Luxury", "Resorts", "Spa", "Romantic", "Hotels with views"], rating: 4.9, reviewCount: 318, currency: "EGP", fromPrice: 15600,
+    images: [P.room, P.pool, P.lounge, P.coast, P.villa], tags: ["Lagoon view", "Fine dining", "Spa"], amenities: ALL, accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible parking", "Accessible room"],
+    atmosphere: ["Luxury", "Romantic", "Quiet"], guestFavorite: false, verification: "PREMIUM_VERIFIED", instantBook: false, payLater: true, cancellationPolicy: "STRICT", monthlyDiscountPct: 10,
+    locationScore: 79, distanceKm: 24, lat: 27.401, lng: 33.672, cats: { cleanliness: 4.9, location: 4.5, staff: 4.9, comfort: 4.9, facilities: 4.8, value: 4.3 },
+    love: [["Service", 93], ["Spa", 88], ["Room quality", 86]], complain: [["Price", 21], ["Limited dinner options", 8]], noise: 4, nearby: gounaNearby, roomImgs: [P.room, P.villa],
+    host: { id: "host-ghm", name: "GHM Hotels", responseRate: 94, responseTime: "within a few hours" } }),
+  build({ id: "h-fs-cairo", slug: "egypt/cairo/four-seasons-nile-plaza", name: "Four Seasons Nile Plaza", city: "Cairo", country: "Egypt", area: "Garden City",
+    description: "A landmark on the Corniche with sweeping Nile views, a dedicated business floor and some of Cairo’s most celebrated restaurants.",
+    category: "City hotel", propertyType: "HOTEL", categories: ["City", "Luxury", "Business", "Pools", "Hotels with views", "Hotels near landmarks"], rating: 4.7, reviewCount: 1102, currency: "EGP", fromPrice: 18500,
+    images: [P.villa, P.city, P.room, P.lounge, P.pool], tags: ["Nile view", "Business", "Pool"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Parking", "Restaurant", "Air conditioning", "Workspace", "Elevator", "Room service", "Laundry"],
+    accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible parking", "Accessible room"], atmosphere: ["Luxury", "Business", "Lively"], guestFavorite: true, verification: "PREMIUM_VERIFIED", instantBook: true, payLater: false, cancellationPolicy: "MODERATE", monthlyDiscountPct: 20,
+    locationScore: 96, distanceKm: 1.2, lat: 30.0366, lng: 31.2306, cats: { cleanliness: 4.8, location: 4.9, staff: 4.8, comfort: 4.7, facilities: 4.7, value: 4.2 },
+    love: [["Nile views", 92], ["Location", 90], ["Fast Wi-Fi", 81]], complain: [["Traffic noise", 18], ["Breakfast crowds", 11]], noise: 18, nearby: cairoNearby,
+    host: { id: "host-fscairo", name: "Four Seasons Cairo", responseRate: 98, responseTime: "within an hour", badge: "TOP_HOST" } }),
+  build({ id: "h-kempinski", slug: "egypt/cairo/kempinski-nile-hotel", name: "Kempinski Nile Hotel", city: "Cairo", country: "Egypt", area: "Garden City",
+    description: "Discreet and quietly elegant, with soundproofed rooms, proper desks and a rooftop pool overlooking the Nile — built for working trips.",
+    category: "Business hotel", propertyType: "HOTEL", categories: ["City", "Business", "Boutique"], rating: 4.6, reviewCount: 764, currency: "EGP", fromPrice: 7900,
+    images: [P.lounge, P.room, P.city, P.villa, P.pool], tags: ["Quiet floors", "Workspace", "Fast Wi-Fi"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Restaurant", "Air conditioning", "Workspace", "Elevator", "Room service", "Laundry"],
+    accessibility: ["Elevator", "Accessible bathroom"], atmosphere: ["Business", "Quiet", "Boutique"], guestFavorite: false, verification: "VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "FLEXIBLE", monthlyDiscountPct: 22,
+    locationScore: 93, distanceKm: 1.5, lat: 30.0396, lng: 31.2316, cats: { cleanliness: 4.7, location: 4.8, staff: 4.7, comfort: 4.6, facilities: 4.5, value: 4.6 },
+    love: [["Quiet rooms", 87], ["Workspace", 83], ["Fast Wi-Fi", 85]], complain: [["Small gym", 13], ["Parking", 9]], noise: 7, nearby: cairoNearby,
+    host: { id: "host-kemp", name: "Kempinski Cairo", responseRate: 96, responseTime: "within an hour", badge: "HIGHLY_RATED_HOST" } }),
+  build({ id: "h-mena-house", slug: "egypt/cairo/marriott-mena-house", name: "Marriott Mena House", city: "Cairo", country: "Egypt", area: "Giza",
+    description: "A 19th-century royal hunting lodge in 40 acres of gardens, with the Great Pyramid filling the view from many rooms.",
+    category: "Historic hotel", propertyType: "HOTEL", categories: ["City", "Luxury", "Family", "Hotels with views", "Hotels near landmarks", "Nature"], rating: 4.7, reviewCount: 1870, currency: "EGP", fromPrice: 11200,
+    images: [P.sunset, P.villa, P.lounge, P.room, P.pool], tags: ["Pyramid views", "Gardens", "Heritage"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Parking", "Restaurant", "Air conditioning", "Room service", "Laundry", "Elevator"],
+    accessibility: ["Step-free access", "Elevator", "Accessible parking"], atmosphere: ["Heritage", "Romantic", "Family"], guestFavorite: true, verification: "VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "FLEXIBLE", monthlyDiscountPct: 18,
+    locationScore: 78, distanceKm: 14, lat: 29.987, lng: 31.13, cats: { cleanliness: 4.7, location: 4.8, staff: 4.7, comfort: 4.6, facilities: 4.7, value: 4.4 },
+    love: [["Pyramid views", 95], ["Gardens", 86], ["History", 80]], complain: [["Distance to downtown", 21], ["Dated rooms in old wing", 12]], noise: 8, nearby: cairoNearby,
+    host: { id: "host-marriott", name: "Marriott Egypt", responseRate: 95, responseTime: "within an hour" } }),
+  build({ id: "h-cecil", slug: "egypt/alexandria/steigenberger-cecil", name: "Steigenberger Cecil", city: "Alexandria", country: "Egypt", area: "Raml Station",
+    description: "A 1929 landmark on Saad Zaghloul Square, facing the Eastern Harbour — Alexandria’s literary and Mediterranean past at the door.",
+    category: "Historic hotel", propertyType: "HOTEL", categories: ["City", "Budget", "Hotels with views", "Hotels near landmarks"], rating: 4.5, reviewCount: 780, currency: "EGP", fromPrice: 6100,
+    images: [P.sunset, P.lounge, P.room, P.city, P.beach], tags: ["Sea view", "Central", "Heritage"], amenities: ["Wi-Fi", "Restaurant", "Air conditioning", "Elevator", "Room service", "Laundry"],
+    accessibility: ["Elevator"], atmosphere: ["Heritage", "Lively"], guestFavorite: false, verification: "VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "FLEXIBLE", available: false, monthlyDiscountPct: 25,
+    locationScore: 95, distanceKm: 0.4, lat: 31.2001, lng: 29.9004, cats: { cleanliness: 4.4, location: 4.9, staff: 4.6, comfort: 4.3, facilities: 4.1, value: 4.6 },
+    love: [["Location", 94], ["Sea views", 85], ["History", 78]], complain: [["Noise", 31], ["Dated bathrooms", 19], ["Slow Wi-Fi", 14]], noise: 31,
+    nearby: [{ name: "Bibliotheca Alexandrina", kind: "LANDMARK", distanceKm: 2.1, travelTime: "7 min drive" }, { name: "Raml Station tram", kind: "TRANSPORT", distanceKm: 0.1, travelTime: "2 min walk" }, { name: "Qaitbay Citadel", kind: "ATTRACTION", distanceKm: 3.5, travelTime: "10 min drive" }, { name: "Borg El Arab Airport", kind: "AIRPORT", distanceKm: 45, travelTime: "50 min drive" }],
+    host: { id: "host-steig", name: "Steigenberger Hotels", responseRate: 91, responseTime: "within a few hours" } }),
+  build({ id: "h-royal-mirage", slug: "uae/dubai/one-and-only-royal-mirage", name: "One&Only Royal Mirage", city: "Dubai", country: "UAE", area: "Al Sufouh",
+    description: "Moorish arches, 65 acres of gardens and a kilometre of private beach on the Arabian Gulf.",
+    category: "Beach resort", propertyType: "RESORT", categories: ["Beach", "Luxury", "Resorts", "Spa", "Family", "Pools"], rating: 4.8, reviewCount: 2140, currency: "AED", fromPrice: 2350,
+    images: [P.beach, P.pool, P.villa, P.room, P.lounge], tags: ["Private beach", "Hammam", "Gardens"], amenities: ALL, accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible parking"],
+    atmosphere: ["Luxury", "Romantic", "Family", "Relaxation"], guestFavorite: true, verification: "PREMIUM_VERIFIED", instantBook: true, payLater: true, cancellationPolicy: "MODERATE", monthlyDiscountPct: 12,
+    locationScore: 84, distanceKm: 6, lat: 25.0989, lng: 55.1525, cats: { cleanliness: 4.9, location: 4.6, staff: 4.9, comfort: 4.8, facilities: 4.9, value: 4.2 },
+    love: [["Gardens", 90], ["Beach", 89], ["Staff", 88]], complain: [["Price", 24], ["Long walks between buildings", 11]], noise: 5, roomImgs: [P.room, P.villa],
+    nearby: [{ name: "Dubai Marina", kind: "SHOPPING", distanceKm: 3, travelTime: "8 min drive" }, { name: "Palm Jumeirah", kind: "LANDMARK", distanceKm: 4, travelTime: "10 min drive" }, { name: "DXB Airport", kind: "AIRPORT", distanceKm: 38, travelTime: "35 min drive" }],
+    host: { id: "host-oo", name: "One&Only Resorts", responseRate: 98, responseTime: "within an hour", badge: "TOP_HOST" }, petsAllowed: false }),
+  build({ id: "h-pavillon", slug: "france/paris/le-pavillon-des-lettres", name: "Le Pavillon des Lettres", city: "Paris", country: "France", area: "8th arrondissement",
+    description: "Twenty-six rooms, each dedicated to a letter of the alphabet and a writer, a short walk from the Élysée and Faubourg Saint-Honoré.",
+    category: "Boutique hotel", propertyType: "HOTEL", categories: ["City", "Boutique", "Romantic", "Hotels near landmarks"], rating: 4.7, reviewCount: 512, currency: "EUR", fromPrice: 390,
+    images: [P.lounge, P.room, P.city, P.villa, P.sunset], tags: ["Literary theme", "Central", "Quiet street"], amenities: ["Wi-Fi", "Air conditioning", "Workspace", "Elevator", "Room service", "Laundry"],
+    accessibility: ["Elevator"], atmosphere: ["Romantic", "Boutique", "Quiet"], guestFavorite: true, verification: "VERIFIED", instantBook: false, payLater: true, cancellationPolicy: "MODERATE", monthlyDiscountPct: 8,
+    locationScore: 95, distanceKm: 1.1, lat: 48.8722, lng: 2.3155, cats: { cleanliness: 4.8, location: 4.9, staff: 4.8, comfort: 4.6, facilities: 4.2, value: 4.3 },
+    love: [["Location", 93], ["Staff", 88], ["Charm", 84]], complain: [["Small rooms", 26], ["No pool or gym", 10]], noise: 8, petsAllowed: true,
+    nearby: [{ name: "Champs-Élysées", kind: "LANDMARK", distanceKm: 0.8, travelTime: "10 min walk" }, { name: "Miromesnil Metro", kind: "TRANSPORT", distanceKm: 0.3, travelTime: "4 min walk" }, { name: "Charles de Gaulle Airport", kind: "AIRPORT", distanceKm: 27, travelTime: "45 min drive" }],
+    host: { id: "host-hp", name: "Hôtels Particuliers", responseRate: 95, responseTime: "within a few hours", badge: "HIGHLY_RATED_HOST" } }),
+  build({ id: "h-the-ned", slug: "uk/london/the-ned", name: "The Ned", city: "London", country: "United Kingdom", area: "City of London",
+    description: "A former Grade I-listed bank by Lutyens, now ten restaurants, a vault bar, a rooftop pool and 250 rooms in the heart of the City.",
+    category: "City hotel", propertyType: "HOTEL", categories: ["City", "Luxury", "Business", "Pools"], rating: 4.6, reviewCount: 1890, currency: "GBP", fromPrice: 420,
+    images: [P.city, P.lounge, P.room, P.pool, P.villa], tags: ["Rooftop pool", "Members’ club", "Business"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Restaurant", "Air conditioning", "Workspace", "Elevator", "Room service", "Laundry"],
+    accessibility: ["Step-free access", "Elevator", "Accessible bathroom", "Accessible room"], atmosphere: ["Lively", "Business", "Luxury"], guestFavorite: false, verification: "PREMIUM_VERIFIED", instantBook: true, payLater: false, cancellationPolicy: "STRICT", monthlyDiscountPct: 10,
+    locationScore: 92, distanceKm: 2.2, lat: 51.5135, lng: -0.0898, cats: { cleanliness: 4.7, location: 4.8, staff: 4.6, comfort: 4.6, facilities: 4.8, value: 4.0 },
+    love: [["Restaurants", 89], ["Rooftop", 85], ["Design", 83]], complain: [["Busy lobby noise", 22], ["Price", 19]], noise: 22,
+    nearby: [{ name: "Bank Underground station", kind: "TRANSPORT", distanceKm: 0.1, travelTime: "1 min walk" }, { name: "St Paul’s Cathedral", kind: "LANDMARK", distanceKm: 0.9, travelTime: "11 min walk" }, { name: "Heathrow Airport", kind: "AIRPORT", distanceKm: 32, travelTime: "50 min by Elizabeth line" }],
+    host: { id: "host-ned", name: "The Ned London", responseRate: 93, responseTime: "within a few hours" } }),
+  build({ id: "h-greenwich", slug: "usa/new-york/the-greenwich-hotel", name: "The Greenwich Hotel", city: "New York", country: "United States", area: "Tribeca",
+    description: "Hand-crafted rooms, a candle-lit pool under a 250-year-old Japanese farmhouse roof, and Tribeca’s cobbled calm.",
+    category: "Boutique hotel", propertyType: "HOTEL", categories: ["City", "Boutique", "Luxury", "Romantic", "Spa"], rating: 4.8, reviewCount: 940, currency: "USD", fromPrice: 1150,
+    images: [P.room, P.lounge, P.city, P.villa, P.pool], tags: ["Tribeca", "Lantern pool", "Quiet"], amenities: ["Wi-Fi", "Pool", "Gym", "Spa", "Restaurant", "Air conditioning", "Workspace", "Elevator", "Room service"],
+    accessibility: ["Elevator", "Accessible bathroom"], atmosphere: ["Romantic", "Quiet", "Luxury", "Boutique"], guestFavorite: true, verification: "PREMIUM_VERIFIED", instantBook: false, payLater: true, cancellationPolicy: "STRICT", monthlyDiscountPct: 6,
+    locationScore: 90, distanceKm: 3.4, lat: 40.7193, lng: -74.0099, cats: { cleanliness: 4.9, location: 4.7, staff: 4.9, comfort: 4.9, facilities: 4.7, value: 4.1 },
+    love: [["Room quality", 92], ["Spa", 86], ["Privacy", 84]], complain: [["Price", 27], ["Dim lighting", 7]], noise: 6, petsAllowed: true,
+    nearby: [{ name: "Franklin St station", kind: "TRANSPORT", distanceKm: 0.3, travelTime: "4 min walk" }, { name: "One World Observatory", kind: "LANDMARK", distanceKm: 1.4, travelTime: "17 min walk" }, { name: "JFK Airport", kind: "AIRPORT", distanceKm: 28, travelTime: "50 min drive" }],
+    host: { id: "host-gw", name: "The Greenwich", responseRate: 97, responseTime: "within an hour", badge: "TOP_HOST" } }),
+];
+
+export const destinations = [
+  { city: "Sharm El Sheikh", detail: "Red Sea, Egypt", image: P.beach },
+  { city: "Cairo", detail: "Egypt", image: P.villa },
+  { city: "Alexandria", detail: "Mediterranean, Egypt", image: P.sunset },
+  { city: "Hurghada", detail: "Red Sea, Egypt", image: P.coast },
+  { city: "Dubai", detail: "United Arab Emirates", image: P.pool },
+  { city: "Paris", detail: "France", image: P.lounge },
+  { city: "London", detail: "United Kingdom", image: P.city },
+  { city: "New York", detail: "United States", image: P.room },
+];
