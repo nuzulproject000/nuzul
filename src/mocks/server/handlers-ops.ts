@@ -106,6 +106,27 @@ route("POST", "/host/reviews/:id/reply", ({ params, body }) => {
   r.hostReply = text.trim(); persist(); return r;
 });
 
+/* Host inbox: the same conversations seen from the property side (§34, §42). */
+route("GET", "/host/conversations", () => {
+  const db = getDb();
+  const mine = new Set(myHotels().map((h) => h.id));
+  return db.conversations.filter((c) => c.hotelId && mine.has(c.hotelId)).map((c) => {
+    const b = db.bookings.find((x) => x.id === c.bookingId);
+    const unread = db.messages.filter((m) => m.conversationId === c.id && m.from === "GUEST" && !m.read).length;
+    return { ...c, title: b?.guestName ?? "Guest", responseTime: b ? `${b.id} · ${b.checkIn}` : "Enquiry", unread };
+  });
+});
+route("POST", "/host/conversations/:id/messages", ({ params, body }) => {
+  const { text } = body as { text: string };
+  if (!text?.trim()) throw invalid({ text: "Message can’t be empty" });
+  const db = getDb();
+  const c = db.conversations.find((x) => x.id === params.id); if (!c) throw notFound("Conversation");
+  const m = { id: id("m"), conversationId: c.id, from: "HOST" as const, text: text.trim(), sentAt: now(), read: false };
+  db.messages.push(m); c.lastMessage = m.text; c.lastAt = m.sentAt; c.unread += 1; persist(); return m;
+});
+route("POST", "/host/messages/:id/unsend", ({ params }) => { const m = getDb().messages.find((x) => x.id === params.id); if (!m) throw notFound("Message"); if (m.from !== "HOST") throw new HttpError(403, "FORBIDDEN", "You can only unsend your own messages"); m.unsent = true; persist(); return m; });
+route("POST", "/host/conversations/:id/read", ({ params }) => { getDb().messages.filter((m) => m.conversationId === params.id && m.from === "GUEST").forEach((m) => (m.read = true)); persist(); return { ok: true }; });
+
 const purposeProfiles: [string, TripPurpose, string[], string[]][] = [
   ["Couples", "COUPLE", ["Romantic", "Quiet"], ["Pool", "Spa"]], ["Honeymoon", "HONEYMOON", ["Romantic", "Luxury"], ["Spa", "Room service"]],
   ["Families", "FAMILY", ["Family"], ["Pool", "Restaurant"]], ["Business", "BUSINESS", ["Business", "Quiet"], ["Wi-Fi", "Workspace"]],

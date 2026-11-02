@@ -16,7 +16,7 @@ export function DashboardLayout({ role, nav, eyebrowKey, user, action }: { role:
   const current = [...nav].sort((a, b) => b.to.length - a.to.length).find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to))) ?? nav[0];
   return (
     <div className="grid min-h-screen grid-cols-[250px_1fr] bg-dash max-lg:grid-cols-[210px_1fr] max-md:block">
-      <a href="#main" className="fixed start-2 -top-16 z-[400] bg-navy px-3.5 py-2.5 text-xs text-white focus:top-2">{t("nav.skip")}</a>
+      <a href="#main" className="fixed start-2 top-2 z-[400] -translate-y-[300%] bg-navy px-3.5 py-2.5 text-xs text-white focus:translate-y-0">{t("nav.skip")}</a>
       <aside className="sticky top-0 flex h-screen flex-col bg-navy px-5 py-7 text-white max-md:hidden">
         <Link to="/" aria-label="Nuzul home"><Logo light /></Link>
         <span className="mx-2.5 mt-6 mb-3 text-[9px] tracking-[0.18em] text-sand uppercase">{t(role === "host" ? "host.workspace" : "admin.administration")}</span>

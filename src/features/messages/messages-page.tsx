@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeft, Bell, Clock3, Hotel as HotelIcon, Image as ImageIcon, MessageCircle, Paperclip, Search, Send, ShieldCheck, Undo2 } from "lucide-react";
 import type { Conversation } from "@/types/models";
+import type { MessagingScope } from "@/services/account.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BookingStateBadge, EmptyState, ErrorState } from "@/components/common";
@@ -13,13 +14,16 @@ import { useBooking, useConversations, useHotel, useMarkConversationRead, useMes
 import { useDates, useMoney } from "@/hooks/use-format";
 import { cn } from "@/lib/utils";
 
-export default function MessagesPage({ basePath = "/messages" }: { basePath?: string }) {
+export default function MessagesPage() { return <Inbox scope="guest" basePath="/messages" />; }
+
+/** Shared inbox for guests and hosts — only the endpoint scope and "self" side differ. */
+export function Inbox({ scope, basePath, className }: { scope: MessagingScope; basePath: string; className?: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const [q, setQ] = useState("");
-  const { data, isLoading, error, refetch } = useConversations();
-  const markRead = useMarkConversationRead();
+  const { data, isLoading, error, refetch } = useConversations(scope);
+  const markRead = useMarkConversationRead(scope);
   const { date } = useDates();
   const list = (data ?? []).filter((c) => c.title.toLowerCase().includes(q.toLowerCase()) || c.lastMessage.toLowerCase().includes(q.toLowerCase()));
   const active = data?.find((c) => c.id === id);
@@ -28,7 +32,7 @@ export default function MessagesPage({ basePath = "/messages" }: { basePath?: st
   useEffect(() => { if (!id && data?.length && window.matchMedia("(min-width: 768px)").matches) navigate(`${basePath}/${data[0].id}`, { replace: true }); }, [id, data, navigate, basePath]);
 
   return (
-    <div className="grid h-[calc(100dvh-78px)] grid-cols-[360px_1fr] border-t border-line max-md:h-[calc(100dvh-64px-64px)] max-md:grid-cols-1">
+    <div className={cn("grid h-[calc(100dvh-78px)] grid-cols-[360px_1fr] border-t border-line max-md:h-[calc(100dvh-64px-64px)] max-md:grid-cols-1", className)}>
       <aside className={cn("flex min-h-0 flex-col border-e border-line bg-paper", id && "max-md:hidden")}>
         <div className="px-5 pt-6 pb-3"><h1 className="mb-4 text-[32px]">{t("messages.title")}</h1>
           <label className="relative block"><Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-ink-muted" /><span className="sr-only">{t("messages.search")}</span><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("messages.search")} className="min-h-10 ps-9" /></label>
@@ -39,7 +43,7 @@ export default function MessagesPage({ basePath = "/messages" }: { basePath?: st
             : list.length === 0 ? <EmptyState className="m-4" icon={<MessageCircle />} title={t("messages.empty")} text={t("messages.emptyText")} />
             : list.map((c) => (
               <button key={c.id} type="button" onClick={() => navigate(`${basePath}/${c.id}`)} aria-current={c.id === id} className={cn("flex w-full items-center gap-3 border-b border-line px-5 py-4 text-start", c.id === id ? "bg-soft" : "hover:bg-soft/50")}>
-                <Avatar c={c} />
+                <Avatar c={c} scope={scope} />
                 <span className="flex min-w-0 flex-1 flex-col"><b className="truncate text-[13px] text-navy">{c.title}</b><small className={cn("truncate text-[12px]", c.unread ? "font-semibold text-charcoal" : "text-ink-muted")}>{c.lastMessage}</small></span>
                 <span className="flex flex-col items-end gap-1"><time className="text-[10px] text-ink-muted">{date(c.lastAt, "d MMM")}</time>{c.unread > 0 && <i className="grid size-[18px] place-items-center rounded-full bg-gold text-[10px] font-bold text-white not-italic" aria-label={`${c.unread} unread`}>{c.unread}</i>}</span>
               </button>
@@ -47,36 +51,38 @@ export default function MessagesPage({ basePath = "/messages" }: { basePath?: st
         </div>
       </aside>
       <section className={cn("flex min-h-0 flex-col bg-ivory", !id && "max-md:hidden")}>
-        {active ? <Thread key={active.id} c={active} onBack={() => navigate(basePath)} /> : <div className="grid flex-1 place-items-center text-[13px] text-ink-muted">{t("messages.select")}</div>}
+        {active ? <Thread key={active.id} c={active} scope={scope} onBack={() => navigate(basePath)} /> : <div className="grid flex-1 place-items-center text-[13px] text-ink-muted">{t("messages.select")}</div>}
       </section>
     </div>
   );
 }
 
-function Avatar({ c }: { c: Conversation }) {
+function Avatar({ c, scope }: { c: Conversation; scope: MessagingScope }) {
+  if (scope === "host") return <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sand text-[12px] font-bold text-navy">{c.title.split(" ").map((w) => w[0]).join("").slice(0, 2)}</span>;
   return <span className="grid size-10 shrink-0 place-items-center rounded-full bg-navy text-sand [&_svg]:size-[18px]">{c.kind === "SUPPORT" ? <ShieldCheck /> : <HotelIcon />}</span>;
 }
 
-function Thread({ c, onBack }: { c: Conversation; onBack: () => void }) {
+function Thread({ c, scope, onBack }: { c: Conversation; scope: MessagingScope; onBack: () => void }) {
+  const self = scope === "host" ? "HOST" : "GUEST";
   const { t } = useTranslation();
   const money = useMoney();
   const { date, range } = useDates();
   const { data: messages, isLoading } = useMessages(c.id);
   const { data: booking } = useBooking(c.bookingId ?? "");
   const { data: hotel } = useHotel(c.hotelId ?? "");
-  const send = useSendMessage(c.id);
-  const unsend = useUnsend(c.id);
+  const send = useSendMessage(c.id, scope);
+  const unsend = useUnsend(c.id, scope);
   const [draft, setDraft] = useState("");
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [messages?.length]);
   const submit = () => { const text = draft.trim(); if (!text) return; send.mutate(text, { onSuccess: () => setDraft("") }); };
-  const lastSentId = useMemo(() => [...(messages ?? [])].reverse().find((m) => m.from === "GUEST")?.id, [messages]);
+  const lastSentId = useMemo(() => [...(messages ?? [])].reverse().find((m) => m.from === self)?.id, [messages, self]);
 
   return (
     <>
       <header className="flex items-center gap-3 border-b border-line bg-paper px-6 py-4 max-md:px-4">
         <Button variant="ghost" size="icon-sm" className="md:hidden" onClick={onBack} aria-label={t("messages.back")}><ArrowLeft className="rtl:rotate-180" /></Button>
-        <Avatar c={c} />
+        <Avatar c={c} scope={scope} />
         <div className="flex flex-col"><b className="text-[14px] text-navy">{c.title}</b><small className="flex items-center gap-1 text-[11px] text-ink-muted"><Clock3 className="size-3" /> {c.responseTime}</small></div>
       </header>
       {booking && hotel && (
@@ -93,14 +99,14 @@ function Thread({ c, onBack }: { c: Conversation; onBack: () => void }) {
           {messages?.map((m) => m.from === "SYSTEM" ? (
             <div key={m.id} className="mx-auto flex max-w-md flex-col items-center gap-1 rounded-md border border-line bg-paper px-4 py-3 text-center text-[12px] text-charcoal"><Bell className="size-3.5 text-gold" />{m.text}<small className="text-[10px] text-ink-muted">{t("messages.automated")} · {date(m.sentAt, "d MMM HH:mm")}</small></div>
           ) : (
-            <div key={m.id} className={cn("group flex max-w-[72%] flex-col gap-1 max-md:max-w-[86%]", m.from === "GUEST" ? "items-end self-end" : "items-start self-start")}>
+            <div key={m.id} className={cn("group flex max-w-[72%] flex-col gap-1 max-md:max-w-[86%]", m.from === self ? "items-end self-end" : "items-start self-start")}>
               {m.unsent ? <em className="rounded-xl border border-dashed border-line px-3.5 py-2 text-[12px] text-ink-muted">{t("messages.unsent")}</em> : <>
-                <div className={cn("rounded-2xl px-4 py-2.5 text-[13px]", m.from === "GUEST" ? "rounded-ee-sm bg-navy text-white" : "rounded-es-sm border border-line bg-paper text-charcoal")}>
+                <div className={cn("rounded-2xl px-4 py-2.5 text-[13px]", m.from === self ? "rounded-ee-sm bg-navy text-white" : "rounded-es-sm border border-line bg-paper text-charcoal")}>
                   {m.imageUrl && <img src={m.imageUrl} alt={t("messages.photo")} className="mb-2 max-h-56 w-full rounded-lg object-cover" />}
                   {m.text}
                 </div>
-                <small className="flex items-center gap-2 text-[10px] text-ink-muted">{date(m.sentAt, "d MMM HH:mm")}{m.from === "GUEST" && m.id === lastSentId && <> · {m.read ? t("messages.read") : t("messages.sent")}</>}
-                  {m.from === "GUEST" && <button type="button" onClick={() => unsend.mutate(m.id)} className="inline-flex items-center gap-1 font-bold text-gold opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100 max-md:opacity-100"><Undo2 className="size-3" /> {t("messages.unsend")}</button>}
+                <small className="flex items-center gap-2 text-[10px] text-ink-muted">{date(m.sentAt, "d MMM HH:mm")}{m.from === self && m.id === lastSentId && <> · {m.read ? t("messages.read") : t("messages.sent")}</>}
+                  {m.from === self && <button type="button" onClick={() => unsend.mutate(m.id)} className="inline-flex items-center gap-1 font-bold text-gold opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100 max-md:opacity-100"><Undo2 className="size-3" /> {t("messages.unsend")}</button>}
                 </small>
               </>}
             </div>

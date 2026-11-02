@@ -5,7 +5,7 @@ import type { BookingState, Category, Hotel, NotificationPrefs, Wishlist } from 
 import type { MatchConfig, MatchProfile } from "@/lib/match-engine";
 import type { Question } from "@/services/questions";
 import { catalogService, hotelsService, type CollectionKind } from "@/services/catalog.service";
-import { bookingService, matchService, meService, messagingService, notificationService, wishlistService } from "@/services/account.service";
+import { bookingService, matchService, meService, messagingService, notificationService, wishlistService, type MessagingScope } from "@/services/account.service";
 import { adminService, hostService } from "@/services/ops.service";
 
 export const qk = {
@@ -123,19 +123,20 @@ export function useSubmitReview() {
 }
 
 /* ---------------------------------------------------------- Messaging */
-export const useConversations = () => useQuery({ queryKey: qk.conversations, queryFn: messagingService.conversations });
+const convKey = (scope: MessagingScope) => (scope === "host" ? ["host", "conversations"] : qk.conversations);
+export const useConversations = (scope: MessagingScope = "guest") => useQuery({ queryKey: convKey(scope), queryFn: () => messagingService.conversations(scope) });
 export const useMessages = (id: string) => useQuery({ queryKey: qk.messages(id), queryFn: () => messagingService.messages(id), enabled: !!id });
-export function useSendMessage(conversationId: string) {
+export function useSendMessage(conversationId: string, scope: MessagingScope = "guest") {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (text: string) => messagingService.send(conversationId, text), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.messages(conversationId) }); qc.invalidateQueries({ queryKey: qk.conversations }); } });
+  return useMutation({ mutationFn: (text: string) => messagingService.send(conversationId, text, scope), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.messages(conversationId) }); qc.invalidateQueries({ queryKey: qk.conversations }); qc.invalidateQueries({ queryKey: ["host", "conversations"] }); } });
 }
-export function useUnsend(conversationId: string) {
+export function useUnsend(conversationId: string, scope: MessagingScope = "guest") {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (messageId: string) => messagingService.unsend(messageId), onSuccess: () => qc.invalidateQueries({ queryKey: qk.messages(conversationId) }) });
+  return useMutation({ mutationFn: (messageId: string) => messagingService.unsend(messageId, scope), onSuccess: () => qc.invalidateQueries({ queryKey: qk.messages(conversationId) }) });
 }
-export function useMarkConversationRead() {
+export function useMarkConversationRead(scope: MessagingScope = "guest") {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: string) => messagingService.markRead(id), onSuccess: () => qc.invalidateQueries({ queryKey: qk.conversations }) });
+  return useMutation({ mutationFn: (id: string) => messagingService.markRead(id, scope), onSuccess: () => qc.invalidateQueries({ queryKey: convKey(scope) }) });
 }
 
 /* ------------------------------------------------------ Notifications */

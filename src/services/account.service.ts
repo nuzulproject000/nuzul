@@ -39,12 +39,14 @@ export const bookingService = {
   review: (id: string, body: { categories: Record<string, number>; text: string }) => unwrap(api.post(`/bookings/${id}/review`, body)),
 };
 
+export type MessagingScope = "guest" | "host";
+/** Same contract for both sides of a conversation; the host inbox lives under /host. */
 export const messagingService = {
-  conversations: () => unwrap<Conversation[]>(api.get("/me/conversations")),
+  conversations: (scope: MessagingScope = "guest") => unwrap<Conversation[]>(api.get(scope === "host" ? "/host/conversations" : "/me/conversations")),
   messages: (conversationId: string) => unwrap<Message[]>(api.get(`/conversations/${conversationId}/messages`)),
-  send: (conversationId: string, text: string) => unwrap<Message>(api.post(`/conversations/${conversationId}/messages`, { text })),
-  unsend: (messageId: string) => unwrap<Message>(api.post(`/messages/${messageId}/unsend`)),
-  markRead: (conversationId: string) => unwrap(api.post(`/conversations/${conversationId}/read`)),
+  send: (conversationId: string, text: string, scope: MessagingScope = "guest") => unwrap<Message>(api.post(`${scope === "host" ? "/host" : ""}/conversations/${conversationId}/messages`, { text })),
+  unsend: (messageId: string, scope: MessagingScope = "guest") => unwrap<Message>(api.post(`${scope === "host" ? "/host" : ""}/messages/${messageId}/unsend`)),
+  markRead: (conversationId: string, scope: MessagingScope = "guest") => unwrap(api.post(`${scope === "host" ? "/host" : ""}/conversations/${conversationId}/read`)),
 };
 
 export const notificationService = {
