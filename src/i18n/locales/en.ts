@@ -94,7 +94,7 @@ const en = {
     perNight: "per night", forNights: "{{amount}} for {{nights}} nights", select: "Select room", soldOut: "Sold out", minNights: "Min {{n}} nights", offers: "What this hotel offers.", accessibility: "Accessibility", accessContact: "Contact the hotel about other accessibility needs",
     fromCentre: "{{km}} km from the city centre", whatGuestsSay: "What guests say.", verifiedOnly: "Only guests who booked and completed a stay through Nuzul can leave a verified review.",
     insights: "Review Insights", insightsSub: "Topics and sentiment extracted from {{count}} verified reviews (lightweight NLP · sample)", love: "Guests love", mention: "Guests mention", sentiment: "Overall sentiment: {{pct}}% positive",
-    writeReview: "Write a review", noReviews: "No reviews yet", noReviewsText: "Verified-stay reviews appear after the first completed stays.", hostResponse: "Response from {{name}}", notVerified: "Not verified",
+    writeReview: "Write a review", noReviews: "No reviews yet", noReviewsText: "Verified-stay reviews appear after the first completed stays.", hostResponse: "Response from {{name}}", notVerified: "Not verified", verifiedStay: "Verified stay",
     goodToKnow: "Good to know.", checkInLabel: "Check-in", checkInText: "From {{time}} · front desk 24 h · ID required", checkOutLabel: "Check-out", checkOutText: "By {{time}} · late check-out on request",
     cancellation: "Cancellation · {{policy}}", children: "Children & extra beds", childrenText: "Children of all ages welcome. Cots free on request.", monthly: "Monthly stays", monthlyText: "{{pct}}% long-stay discount from 28 nights · 30 days’ notice to cancel a monthly booking.",
     rules: "House rules", rulesText: "No smoking in rooms · No parties · Pets {{pets}}.", petsAllowed: "allowed", petsNo: "not allowed",
@@ -172,7 +172,7 @@ const en = {
     openNotifications: "Open notification settings", notificationsText: "Manage which updates you receive in-app, by email and by push.",
     privacy: { password: "Password", passwordSub: "Last changed 3 months ago", change: "Change", sessions: "Active sessions", sessionsSub: "This browser · Nuzul app on iPhone", signOutOthers: "Sign out others", location: "Use my location for nearby stays", locationSub: "Approximate location only", personalised: "Personalised recommendations", personalisedSub: "Uses your Match Profile, searches, likes and bookings", data: "Download my data", dataSub: "A copy of your profile, trips and reviews", request: "Request", deleteAccount: "Delete account", deleteSub: "Permanently remove your account", requested: "Request received (prototype)" },
   },
-  auth: {
+  auth: { resent: "A new code is on its way", codeHint: "Prototype: any 6 digits work; 000000 simulates an expired code.", oauthNote: "Google sign-in connects in production. This prototype doesn’t contact Google.",
     eyebrow: "More than a stay", title1: "Your next story", title2: "starts here.", lead: "Save stays, manage trips, and keep your Match Profile close.", note: "Prototype authentication · no account data is stored",
     signIn: "Sign in", signUp: "Sign up", reset: "Reset", verify: "Verify", session: "Session", welcome: "Welcome back", create: "Create your account", signInTitle: "Sign in to Nuzul", joinTitle: "Join Nuzul",
     role: { GUEST: "Guest", HOST: "Host", ADMIN: "Admin" }, roleSub: { GUEST: "Book stays", HOST: "List a hotel", ADMIN: "Platform staff" }, accountType: "Account type",

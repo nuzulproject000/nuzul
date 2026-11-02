@@ -102,7 +102,7 @@ const ar: Shape<Dictionary> = {
     perNight: "لليلة", forNights: "{{amount}} لـ{{nights}} ليالٍ", select: "اختر الغرفة", soldOut: "محجوز", minNights: "الحد الأدنى {{n}} ليالٍ", offers: "ما يقدّمه هذا الفندق.", accessibility: "إمكانية الوصول", accessContact: "تواصل مع الفندق بشأن احتياجات الوصول الأخرى",
     fromCentre: "{{km}} كم من مركز المدينة", whatGuestsSay: "ماذا يقول الضيوف.", verifiedOnly: "فقط الضيوف الذين حجزوا وأكملوا إقامتهم عبر نُزُل يمكنهم كتابة تقييم موثّق.",
     insights: "رؤى التقييمات", insightsSub: "مواضيع ومشاعر مستخلصة من {{count}} تقييم موثّق (معالجة لغوية خفيفة · تجريبي)", love: "يحب الضيوف", mention: "يذكر الضيوف", sentiment: "الانطباع العام: {{pct}}% إيجابي",
-    writeReview: "اكتب تقييمًا", noReviews: "لا توجد تقييمات بعد", noReviewsText: "تظهر التقييمات الموثقة بعد اكتمال أولى الإقامات.", hostResponse: "رد من {{name}}", notVerified: "غير موثّق",
+    writeReview: "اكتب تقييمًا", noReviews: "لا توجد تقييمات بعد", noReviewsText: "تظهر التقييمات الموثقة بعد اكتمال أولى الإقامات.", hostResponse: "رد من {{name}}", notVerified: "غير موثّق", verifiedStay: "إقامة موثقة",
     goodToKnow: "معلومات مفيدة.", checkInLabel: "تسجيل الوصول", checkInText: "من {{time}} · مكتب استقبال 24 ساعة · بطاقة الهوية مطلوبة", checkOutLabel: "تسجيل المغادرة", checkOutText: "قبل {{time}} · مغادرة متأخرة عند الطلب",
     cancellation: "الإلغاء · {{policy}}", children: "الأطفال والأسرّة الإضافية", childrenText: "نرحب بالأطفال من جميع الأعمار. أسرّة الأطفال مجانية عند الطلب.", monthly: "الإقامات الشهرية", monthlyText: "خصم إقامة طويلة {{pct}}% من 28 ليلة · إشعار قبل 30 يومًا لإلغاء الحجز الشهري.",
     rules: "قواعد المكان", rulesText: "ممنوع التدخين في الغرف · ممنوع الحفلات · الحيوانات الأليفة {{pets}}.", petsAllowed: "مسموحة", petsNo: "غير مسموحة",
@@ -180,7 +180,7 @@ const ar: Shape<Dictionary> = {
     openNotifications: "فتح إعدادات الإشعارات", notificationsText: "تحكّم في التحديثات التي تصلك داخل التطبيق وبالبريد وفوريًا.",
     privacy: { password: "كلمة المرور", passwordSub: "آخر تغيير قبل 3 أشهر", change: "تغيير", sessions: "الجلسات النشطة", sessionsSub: "هذا المتصفح · تطبيق نُزُل على آيفون", signOutOthers: "تسجيل خروج الأجهزة الأخرى", location: "استخدام موقعي للإقامات القريبة", locationSub: "الموقع التقريبي فقط", personalised: "توصيات مخصّصة", personalisedSub: "تعتمد على ملف التطابق والبحث والإعجابات والحجوزات", data: "تنزيل بياناتي", dataSub: "نسخة من ملفك ورحلاتك وتقييماتك", request: "طلب", deleteAccount: "حذف الحساب", deleteSub: "إزالة حسابك نهائيًا", requested: "تم استلام الطلب (تجريبي)" },
   },
-  auth: {
+  auth: { resent: "تم إرسال رمز جديد", codeHint: "نموذج أولي: أي 6 أرقام تعمل؛ ‎000000‎ يحاكي رمزًا منتهي الصلاحية.", oauthNote: "يتم ربط تسجيل الدخول عبر Google في نسخة الإنتاج. هذا النموذج لا يتصل بـ Google.",
     eyebrow: "أكثر من مجرد إقامة", title1: "قصتك القادمة", title2: "تبدأ هنا.", lead: "احفظ الإقامات وأدِر رحلاتك وابقَ قريبًا من ملف تطابقك.", note: "مصادقة تجريبية · لا يتم تخزين بيانات الحساب",
     signIn: "دخول", signUp: "تسجيل", reset: "استعادة", verify: "تحقق", session: "الجلسة", welcome: "مرحبًا بعودتك", create: "أنشئ حسابك", signInTitle: "سجّل الدخول إلى نُزُل", joinTitle: "انضم إلى نُزُل",
     role: { GUEST: "ضيف", HOST: "مضيف", ADMIN: "مسؤول" }, roleSub: { GUEST: "احجز الإقامات", HOST: "أضف فندقًا", ADMIN: "فريق المنصة" }, accountType: "نوع الحساب",
