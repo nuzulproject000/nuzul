@@ -1,4 +1,5 @@
 /* Sticky booking card (§28, §30). Desktop: sidebar. Mobile: fixed bottom bar. */
+import { useAuthGate } from "@/components/auth/auth-gate";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -44,7 +45,8 @@ export function BookingCard({ hotel: h, onChooseRoom }: { hotel: HotelWithMatch;
   const room = h.rooms.find((r) => r.id === roomId) ?? preferred;
   const nights = nightsBetween(s.checkIn, s.checkOut);
   const soldOut = !h.available || room.available === 0;
-  const book = () => navigate(bookPath(h.id, room.id));
+  const gate = useAuthGate();
+  const book = () => gate("book", () => navigate(bookPath(h.id, room.id)), bookPath(h.id, room.id));
 
   return (
     <>

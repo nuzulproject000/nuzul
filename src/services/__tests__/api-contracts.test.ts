@@ -1,5 +1,6 @@
 /* Contract tests: the typed services against the mock backend. A real backend must satisfy the same behaviour. */
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { asAdmin, asGuest, asHost } from "@/test/session";
 import { hotelsService } from "@/services/catalog.service";
 import { bookingService, meService, wishlistService, authService } from "@/services/account.service";
 import { adminService, hostService } from "@/services/ops.service";
@@ -36,6 +37,7 @@ describe("search (§13–14)", () => {
 });
 
 describe("booking lifecycle (§29–33, §63)", () => {
+  beforeEach(asGuest);
   it("validates input with field errors", async () => {
     const e = await fail(bookingService.create(req({ checkOut: "2027-03-10", guest: { firstName: "", lastName: "", email: "bad", phone: "" } })));
     expect(e.status).toBe(422);
@@ -57,6 +59,7 @@ describe("booking lifecycle (§29–33, §63)", () => {
     const c = await bookingService.cancel(b.id);
     expect(c.refundPct).toBe(100);
     expect(c.booking.state).toBe("REFUNDED");
+    await asHost();
     const pending = (await hostService.reservations(["PENDING"])).items[0];
     expect((await hostService.transition(pending.id, "CONFIRMED")).state).toBe("CONFIRMED");
     expect((await fail(hostService.transition(pending.id, "COMPLETED"))).status).toBe(409);
@@ -72,6 +75,7 @@ describe("booking lifecycle (§29–33, §63)", () => {
 });
 
 describe("wishlists (§21–22)", () => {
+  beforeEach(asGuest);
   it("creates, likes and moves", async () => {
     const w = await wishlistService.create("Winter sun");
     const lists = await wishlistService.list();
@@ -88,6 +92,7 @@ describe("wishlists (§21–22)", () => {
 
 describe("Match Engine admin (§49)", () => {
   it("rejects weights that don’t total 100 and recomputes scores when saved", async () => {
+    await asAdmin();
     expect((await fail(adminService.saveMatchConfig({ ...DEFAULT_CONFIG, weights: { ...DEFAULT_CONFIG.weights, location: 50 } }))).status).toBe(422);
     const before = (await hotelsService.get("h-cecil")).match.score;
     await adminService.saveMatchConfig({ ...DEFAULT_CONFIG, weights: { ...DEFAULT_CONFIG.weights, location: 5, atmosphere: 25 } });
@@ -95,6 +100,7 @@ describe("Match Engine admin (§49)", () => {
     expect((await adminService.audit())[0].action).toMatch(/location 20 → 5/);
   });
   it("profile edits change scores", async () => {
+    await asGuest();
     const before = (await hotelsService.get("h-cecil")).match.score;
     await meService.saveProfile({ atmosphere: ["Lively"], budget: "BUDGET" });
     expect((await hotelsService.get("h-cecil")).match.score).not.toBe(before);
@@ -103,9 +109,26 @@ describe("Match Engine admin (§49)", () => {
 
 describe("auth (§60)", () => {
   it("validates credentials and simulates a wrong password", async () => {
-    expect((await fail(authService.login({ email: "x", password: "1", role: "GUEST" }))).status).toBe(422);
-    expect((await fail(authService.login({ email: "a@b.co", password: "wrongpassword", role: "GUEST" }))).status).toBe(401);
-    expect((await authService.login({ email: "a@b.co", password: "correct-horse", role: "HOST" })).user.role).toBe("HOST");
+    expect((await fail(authService.login({ email: "x", password: "1" }))).status).toBe(422);
+    expect((await fail(authService.login({ email: "nadia@example.com", password: "wrongpassword" }))).status).toBe(401);
+    expect((await fail(authService.login({ email: "nobody@example.com", password: "correct-horse" }))).status).toBe(401);
+    expect((await authService.login({ email: "partners@rixos.example", password: "correct-horse" })).user.role).toBe("HOST");
+  });
+  it("registers, verifies and resets a password (simulated email)", async () => {
+    expect((await authService.register({ name: "Rana", email: "rana@example.com", password: "long-enough", role: "GUEST" })).status).toBe("VERIFICATION_SENT");
+    expect((await fail(authService.register({ name: "Rana", email: "rana@example.com", password: "long-enough", role: "GUEST" }))).fieldErrors?.email).toBeTruthy();
+    expect((await authService.verifyEmail("rana@example.com", "123456")).user.email).toBe("rana@example.com");
+    const { demoResetToken } = await authService.forgotPassword("rana@example.com");
+    expect((await fail(authService.resetPassword({ token: demoResetToken, password: "new-password", confirm: "different" }))).status).toBe(422);
+    expect((await authService.resetPassword({ token: demoResetToken, password: "new-password", confirm: "new-password" })).email).toBe("rana@example.com");
+  });
+  it("enforces roles on protected endpoints", async () => {
+    expect((await fail(bookingService.mine())).status).toBe(401);
+    await asGuest();
+    expect((await fail(hostService.reservations())).status).toBe(403);
+    expect((await fail(adminService.users({}))).status).toBe(403);
+    await asHost();
+    expect((await fail(bookingService.create(req()))).status).toBe(403);
   });
 });
 

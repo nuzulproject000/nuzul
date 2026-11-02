@@ -53,7 +53,7 @@ export default function ProfilePage() {
           <button type="button" aria-label={t("profile.changePhoto")} onClick={() => toast.info(t("profile.photoNote"))} className="absolute end-0 bottom-0 grid size-7 place-items-center rounded-full border border-line bg-paper text-navy"><Pencil className="size-3" /></button></div>
         <div className="flex-1"><span className="eyebrow">{t("profile.eyebrow")}</span><h1 className="mb-1 text-[40px] max-md:text-[30px]">{me?.name ?? "—"}</h1>
           <p className="m-0 flex flex-wrap items-center gap-2 text-[12px] text-ink-muted"><MapPin className="size-3.5" /> {me?.city} · {t("profile.memberSince", { year: me?.joinedAt.slice(0, 4) ?? "" })} · <span className="inline-flex items-center gap-1 text-success"><BadgeCheck className="size-3.5" /> {t("profile.emailVerified")}</span></p></div>
-        <Button variant="outline" onClick={() => { signOut(); navigate("/auth/sign-in"); }}><LogOut /> {t("nav.signOut")}</Button>
+        <Button variant="outline" onClick={() => { signOut(); navigate("/", { replace: true }); }}><LogOut /> {t("nav.signOut")}</Button>
       </div>
       <div className="grid grid-cols-[250px_1fr] gap-12 max-md:grid-cols-1 max-md:gap-6">
         <nav aria-label={t("nav.profile")} className="flex flex-col gap-1 self-start max-md:hidden">

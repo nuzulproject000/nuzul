@@ -70,7 +70,7 @@ Evidence: **U** unit test · **C** API-contract test · **J** user-journey test 
 | 57 | Responsive: desktop / tablet / mobile patterns | ✅ | bottom nav, sheets, stacked tables, mobile booking bar | E |
 | 58 | Design system | ✅ | `components/ui`, `/system` | E |
 | 59 | Match Score UI identity | ✅ | `MatchRing`, `MatchPill`, `MatchLarge` | E |
-| 60 | Auth: sign in/up, roles, reset, verify, session expired | 🔌 | `features/auth` | J · UI + contract complete; identity provider/OAuth not connected |
+| 60 | Auth: sign in/up, roles, reset, verify, session expired | 🔌 | `features/auth`, `app/guards.tsx`, `mocks/server/context.ts` | C · J · E · demo accounts per role, sign-up (guest/host) → verify, forgot → reset, per-tab session, protected routes with `next` return, access-denied, expiry; **mock authentication only** — identity provider/OAuth/email not connected |
 | 61 | Security | ➖ | no secrets in client; token header; inputs validated client + server | — |
 | 62 | Payment architecture; no raw card storage | 🔌 | checkout step 7 (token only), Admin → Payments, Host → Earnings | C (decline) · provider not connected, labelled |
 | 63 | Booking state machine (9 states) | ✅ | mock transitions, trip timeline, host actions | C |
@@ -100,5 +100,18 @@ Evidence: **U** unit test · **C** API-contract test · **J** user-journey test 
 | 87 | Seed data: Cairo, Alexandria, Sharm, Hurghada, Dubai, Paris, London, New York | ✅ | `mocks/hotels.ts` (13 hotels, 8 cities) | — |
 | 88 | Definition of done | 🟡 | met for the frontend; backend items above remain | — |
 | 89 | Product positioning | ✅ | copy & differentiators | — |
+
+## Role-based product & shared data ecosystem (follow-up brief)
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Visitor experience: public browsing; sign-in prompt for save/book/review/message/account; return to the same page | ✅ | J (visitor save prompt, booking resume) · E |
+| Guest: dashboard (`/account`), profile, settings, wishlists, trips, trip detail, cancel/change, reviews, notifications, messages | ✅ | C · J · E |
+| Host: dashboard, listings create/edit/resubmit, rooms, pricing, calendar/availability, reservations + state machine, messages, reviews/replies, profile, settings, notifications | ✅ | C · J · E |
+| Admin: dashboard, users (suspend with reason / reinstate / role), hosts, properties moderation (approve/reject/request info/suspend with note), bookings, reviews moderation, reports, payments, settings, support inbox, notifications | ✅ | C · J · E |
+| Auth states: sign in, sign up, verify, forgot, reset, expired, sign out, role switch, persistence, unauthorized handling | ✅ (mock) | C · J · E |
+| Role-aware routing: guards, 403 page, 404, deep links, back/forward, `next` return incl. checkout | ✅ | J · E (78 role/route combinations × EN desktop + AR mobile) |
+| Single source of truth with stable IDs and relationships; cross-role sync; per-recipient notifications; persistence; reset | ✅ | `services/__tests__/cross-role.test.ts` TEST 1–8 |
+| Simulated operations clearly labelled (demo strip, sign-in note, payments, email links) | ✅ | E |
 
 **Summary (89 rows):** 71 ✅ Done · 9 🟡 Partial · 4 🔌 Backend-dependent · 5 ➖ N/A to frontend. Several 🟡 rows are partial only because part of them is backend-dependent (noted per row).

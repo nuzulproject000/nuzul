@@ -1,4 +1,5 @@
-import { BarChart3, Building2, Compass, CreditCard, Flag, LayoutDashboard, List, Settings, ShieldCheck, SlidersHorizontal, Star, Users } from "lucide-react";
+import { MessageCircle, BarChart3, Building2, Compass, CreditCard, Flag, LayoutDashboard, List, Settings, ShieldCheck, SlidersHorizontal, Star, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { DashboardLayout, type DashNavItem } from "@/components/layout/dashboard-layout";
 
 const NAV: DashNavItem[] = [
@@ -9,6 +10,7 @@ const NAV: DashNavItem[] = [
   { to: "/admin/reservations", labelKey: "admin.nav.reservations", icon: List },
   { to: "/admin/reviews", labelKey: "admin.nav.reviews", icon: Star },
   { to: "/admin/reports", labelKey: "admin.nav.reports", icon: Flag },
+  { to: "/admin/messages", labelKey: "admin.nav.support", icon: MessageCircle },
   { to: "/admin/payments", labelKey: "admin.nav.payments", icon: CreditCard },
   { to: "/admin/categories", labelKey: "admin.nav.categories", icon: Compass },
   { to: "/admin/match-engine", labelKey: "admin.nav.matchEngine", icon: SlidersHorizontal },
@@ -17,5 +19,6 @@ const NAV: DashNavItem[] = [
 ];
 
 export function AdminLayout() {
-  return <DashboardLayout role="admin" nav={NAV} eyebrowKey="admin.operations" user={{ initials: "AU", name: "Admin User", sub: "Platform operations" }} />;
+  const { t } = useTranslation();
+  return <DashboardLayout role="admin" nav={NAV} eyebrowKey="admin.operations" sub={t("auth.role.ADMIN")} />;
 }

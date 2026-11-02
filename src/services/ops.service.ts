@@ -23,8 +23,8 @@ export type AuditEntry = { at: string; actor: string; action: string };
 
 export const hostService = {
   hotels: () => unwrap<Hotel[]>(api.get("/host/hotels")),
-  createHotel: (body: Partial<Hotel>) => unwrap<Hotel>(api.post("/host/hotels", body)),
-  updateHotel: (id: string, patch: Partial<Hotel>) => unwrap<Hotel>(api.patch(`/host/hotels/${id}`, patch)),
+  createHotel: (body: Partial<Omit<Hotel, "rooms">> & { rooms: Partial<Room>[] }) => unwrap<Hotel>(api.post("/host/hotels", body)),
+  updateHotel: (id: string, patch: Partial<Hotel> & { resubmit?: boolean }) => unwrap<Hotel>(api.patch(`/host/hotels/${id}`, patch)),
   updateRoom: (id: string, patch: Partial<Room>) => unwrap<Room>(api.patch(`/host/rooms/${id}`, patch)),
   calendar: (roomId: string) => unwrap<CalendarDay[]>(api.get(`/host/rooms/${roomId}/calendar`)),
   updateCalendar: (roomId: string, dates: string[], patch: Partial<CalendarDay>) => unwrap<CalendarDay[]>(api.put(`/host/rooms/${roomId}/calendar`, { dates, patch })),

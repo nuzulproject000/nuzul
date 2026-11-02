@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { BarChart3, BedDouble, Building2, CalendarDays, DollarSign, LayoutDashboard, List, MessageCircle, Percent, Plus, Star, TrendingUp, User } from "lucide-react";
+import { Settings, BarChart3, BedDouble, Building2, CalendarDays, DollarSign, LayoutDashboard, List, MessageCircle, Percent, Plus, Star, TrendingUp, User } from "lucide-react";
 import { DashboardLayout, type DashNavItem } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 
@@ -18,9 +18,10 @@ const NAV: DashNavItem[] = [
   { to: "/host/match-insights", labelKey: "host.nav.insights", icon: TrendingUp },
   { to: "/host/reviews", labelKey: "host.nav.reviews", icon: Star },
   { to: "/host/profile", labelKey: "host.nav.profile", icon: User },
+  { to: "/host/settings", labelKey: "host.nav.settings", icon: Settings },
 ];
 
 export function HostLayout() {
   const { t } = useTranslation();
-  return <DashboardLayout role="host" nav={NAV} eyebrowKey="host.propertyWorkspace" user={{ initials: "RH", name: "Rixos Hotels Egypt", sub: "Top Host · Premium Verified" }} action={<Button variant="gold" asChild className="max-md:min-h-10 max-md:px-3"><Link to="/host/listings/new"><Plus /> {t("host.addListing")}</Link></Button>} />;
+  return <DashboardLayout role="host" nav={NAV} eyebrowKey="host.propertyWorkspace" sub={t("auth.role.HOST")} action={<Button variant="gold" asChild className="max-md:min-h-10 max-md:px-3"><Link to="/host/listings/new"><Plus /> {t("host.addListing")}</Link></Button>} />;
 }

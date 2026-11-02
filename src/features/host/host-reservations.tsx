@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { BookingStateBadge, Chip, EmptyState, ErrorState } from "@/components/common";
 import { Avatar, DataTable, Toolbar } from "@/components/dashboard";
-import { useHostHotels, useHostMutation, useHostReservations } from "@/hooks/queries";
+import { useConversations, useHostHotels, useHostMutation, useHostReservations } from "@/hooks/queries";
 import { hostService } from "@/services/ops.service";
 import { useDates, useMoney } from "@/hooks/use-format";
 import { errorMessage } from "@/lib/forms";
@@ -32,6 +32,7 @@ export default function HostReservations() {
   const [q, setQ] = useState("");
   const { data, isLoading, error, refetch } = useHostReservations(filter === "ALL" ? undefined : [filter]);
   const { data: hotels } = useHostHotels();
+  const { data: convos } = useConversations();
   const [open, setOpen] = useState<Booking | null>(null);
   const [confirm, setConfirm] = useState<{ b: Booking; to: BookingState } | null>(null);
   const move = useHostMutation(({ id, to }: { id: string; to: BookingState }) => hostService.transition(id, to), [["bookings"]]);
@@ -69,7 +70,7 @@ export default function HostReservations() {
             <PriceBreakdownTable booking={open} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => navigate("/host/messages")}><MessageCircle /> {t("host.res.message")}</Button>
+            <Button variant="outline" onClick={() => { const c = convos?.find((x) => x.bookingId === open.id || (x.guestId === open.guestId && x.hotelId === open.hotelId)); navigate(c ? `/host/messages/${c.id}` : "/host/messages"); }}><MessageCircle /> {t("host.res.message")}</Button>
             {NEXT_STATES[open.state].map((to) => <Button key={to} variant={destructive(to) ? "destructive" : "default"} disabled={move.isPending} onClick={() => (destructive(to) ? setConfirm({ b: open, to }) : run(open, to))}>{t(`host.res.to.${to}`)}</Button>)}
           </DialogFooter>
         </DialogContent>}

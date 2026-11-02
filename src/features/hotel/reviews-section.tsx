@@ -1,4 +1,6 @@
 /* Reviews (§25–27): verified-stay only, category scores, Review Insights, sorting, pagination. */
+import { useIsGuest } from "@/stores/session.store";
+import { useAuthGate } from "@/components/auth/auth-gate";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -22,7 +24,9 @@ export function ReviewsSection({ hotel: h }: { hotel: HotelWithMatch }) {
   const [page, setPage] = useState(1);
   const [gate, setGate] = useState(false);
   const { data, isLoading } = useReviews(h.id, sort, page);
-  const { data: bookings } = useMyBookings();
+  const isGuest = useIsGuest();
+  const authGate = useAuthGate();
+  const { data: bookings } = useMyBookings(isGuest);
   const eligible = bookings?.find((b) => b.hotelId === h.id && b.state === "COMPLETED" && !b.reviewed);
   const label = h.rating >= 4.8 ? t("hotel.exceptional") : h.rating >= 4.5 ? t("hotel.excellent") : t("hotel.veryGood");
   const positive = h.insights.filter((i) => i.sentiment === "positive");
@@ -58,7 +62,7 @@ export function ReviewsSection({ hotel: h }: { hotel: HotelWithMatch }) {
 
       <div className="mt-9 mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="w-56"><Select ariaLabel={t("results.sort")} value={sort} onValueChange={(v) => { setSort(v as ReviewSort); setPage(1); }} options={(["RELEVANT", "RECENT", "HIGHEST", "LOWEST"] as const).map((k) => ({ value: k, label: t(`hotel.sortReviews.${k}`) }))} className="min-h-10" /></div>
-        <Button variant="outline" size="sm" onClick={() => (eligible ? navigate(`/trips?tab=COMPLETED&review=${eligible.id}`) : setGate(true))}><PenLine /> {t("hotel.writeReview")}</Button>
+        <Button variant="outline" size="sm" onClick={() => authGate("review", () => (eligible ? navigate(`/trips?tab=COMPLETED&review=${eligible.id}`) : setGate(true)))}><PenLine /> {t("hotel.writeReview")}</Button>
       </div>
 
       {isLoading ? <div className="skeleton h-40" /> : !data?.items.length ? <EmptyState title={t("hotel.noReviews")} text={t("hotel.noReviewsText")} /> : (

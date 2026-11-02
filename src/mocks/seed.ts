@@ -1,9 +1,13 @@
 /* Seed records for the mock backend (sample data only). */
-import type { AppNotification, Booking, Category, Conversation, HostQuality, Message, Report, Review, Transaction, User, Wishlist } from "@/types/models";
+import type { AppNotification, Booking, Category, ConversationRecord, HostQuality, Message, Report, Review, Transaction, User, Wishlist } from "@/types/models";
 import { hotelsSeed } from "./hotels";
 import { computePrice } from "@/lib/pricing";
 
-export const CURRENT_GUEST_ID = "u-nadia";
+/* Demo accounts (§60). One guest, one host and one admin are surfaced on the sign-in page. */
+export const DEMO_GUEST_ID = "u-nadia";
+export const DEMO_HOST_ID = "host-rixos";
+export const DEMO_ADMIN_ID = "u-admin";
+const CURRENT_GUEST_ID = DEMO_GUEST_ID;
 
 export const categoriesSeed: Category[] = [
   "Beach", "Luxury", "Resorts", "Pools", "City", "Romantic", "Family", "Business", "Boutique", "Budget", "Spa", "Nature", "Apartments", "Villas", "Hotels with views", "Hotels near landmarks",
@@ -24,7 +28,7 @@ export const reviewsSeed: Review[] = [
   r("rv-7", "h-casa-cook", "Daniel M.", "Germany", "Couple", "2026-08-02", 4.5, [5, 4.5, 4.5, 4, 4.5, 4.5], "Loved the pool and breakfast. Wi-Fi was slow in the evenings.", true, 82),
   r("rv-8", "h-fs-cairo", "Hana B.", "Egypt", "Business", "2026-10-01", 4.7, [5, 5, 5, 4.5, 4.5, 4], "Perfect for meetings downtown, fast Wi-Fi and the Nile view from the desk. Some traffic noise on lower floors.", true, 88),
   r("rv-9", "h-kempinski", "Karim A.", "Egypt", "Business", "2026-09-19", 4.8, [5, 5, 4.5, 5, 4.5, 5], "Quietest hotel I’ve stayed at in Cairo. Proper desk, great Wi-Fi, small but fine gym.", true, 92),
-  r("rv-10", "h-cecil", "Nadia A.", "Egypt", "Couple", "2026-06-13", 4.3, [4, 5, 5, 4, 3.5, 4.5], "Unbeatable location on the Corniche and lovely staff. Street noise at night — ask for a courtyard room.", true, 86, { bookingId: "NZL-260611-3019" }),
+  r("rv-10", "h-cecil", "Nadia A.", "Egypt", "Couple", "2026-06-13", 4.3, [4, 5, 5, 4, 3.5, 4.5], "Unbeatable location on the Corniche and lovely staff. Street noise at night — ask for a courtyard room.", true, 86, { bookingId: "NZL-260611-3019", authorId: "u-nadia" }),
   r("rv-11", "h-chedi", "Youssef H.", "Egypt", "Honeymoon", "2026-09-28", 5, [5, 4.5, 5, 5, 5, 4.5], "Felt like we had the lagoon to ourselves. The spa is exceptional.", true, 89),
   r("rv-12", "h-alcazar", "h0tel_fan22", "—", "Group", "2026-10-20", 5, [5, 5, 5, 5, 5, 5], "BEST HOTEL EVER!!! book now at cheap-deals-link…", false, 5, { moderation: "FLAGGED", flagReason: "Spam link · 6 similar reviews in 1 hour" }),
 ];
@@ -32,7 +36,7 @@ export const reviewsSeed: Review[] = [
 const mkBooking = (id: string, hotelId: string, roomSuffix: string, checkIn: string, checkOut: string, nights: number, state: Booking["state"], adults: number, payment: Booking["payment"], extra: Partial<Booking> = {}, guestName = "Nadia Amin", guestId = CURRENT_GUEST_ID): Booking => {
   const h = hotelsSeed.find((x) => x.id === hotelId)!;
   const room = h.rooms.find((x) => x.id.endsWith(roomSuffix))!;
-  return { id, hotelId, roomId: room.id, guestId, guestName, checkIn, checkOut, nights, guests: { adults, children: 0, infants: 0, pets: 0, rooms: 1 }, state, price: computePrice(room.nightlyPrice, nights, { longStayPct: h.monthlyDiscountPct }), currency: h.currency, payment, createdAt: "2026-04-10T10:00:00Z", ...extra };
+  return { id, hotelId, roomId: room.id, guestId, hostId: h.host.id, guestName, checkIn, checkOut, nights, guests: { adults, children: 0, infants: 0, pets: 0, rooms: 1 }, state, price: computePrice(room.nightlyPrice, nights, { longStayPct: h.monthlyDiscountPct }), currency: h.currency, payment, createdAt: "2026-04-10T10:00:00Z", ...extra };
 };
 
 export const bookingsSeed: Booking[] = [
@@ -51,40 +55,46 @@ export const bookingsSeed: Booking[] = [
 ];
 
 export const wishlistsSeed: Wishlist[] = [
-  { id: "wl-1", name: "Red Sea escape", hotelIds: ["h-rixos-seagate", "h-casa-cook", "h-chedi"], dates: { checkIn: "2027-05-16", checkOut: "2027-05-19", guests: 2 }, privacy: "SHARED", collaborators: ["Karim A.", "Salma N."], updatedAt: "2026-11-01" },
-  { id: "wl-2", name: "Cairo work trips", hotelIds: ["h-fs-cairo", "h-kempinski"], privacy: "PRIVATE", collaborators: [], updatedAt: "2026-10-20" },
-  { id: "wl-3", name: "Someday · Europe", hotelIds: ["h-pavillon", "h-the-ned"], privacy: "PRIVATE", collaborators: [], updatedAt: "2026-09-02" },
+  { id: "wl-1", ownerId: "u-nadia", name: "Red Sea escape", hotelIds: ["h-rixos-seagate", "h-casa-cook", "h-chedi"], dates: { checkIn: "2027-05-16", checkOut: "2027-05-19", guests: 2 }, privacy: "SHARED", collaborators: ["Karim A.", "Salma N."], updatedAt: "2026-11-01" },
+  { id: "wl-2", ownerId: "u-nadia", name: "Cairo work trips", hotelIds: ["h-fs-cairo", "h-kempinski"], privacy: "PRIVATE", collaborators: [], updatedAt: "2026-10-20" },
+  { id: "wl-3", ownerId: "u-nadia", name: "Someday · Europe", hotelIds: ["h-pavillon", "h-the-ned"], privacy: "PRIVATE", collaborators: [], updatedAt: "2026-09-02" },
 ];
 
-export const conversationsSeed: Conversation[] = [
-  { id: "c-1", title: "Rixos Premium Seagate", hotelId: "h-rixos-seagate", bookingId: "NZL-260519-8472", kind: "HOTEL", responseTime: "Typically replies within an hour", lastMessage: "We’ve added that preference to your reservation.", lastAt: "2026-11-02T10:42:00Z", unread: 1 },
-  { id: "c-2", title: "Nuzul Support", kind: "SUPPORT", responseTime: "Support · replies within 2 hours", lastMessage: "How can we help with your trip?", lastAt: "2026-10-26T09:00:00Z", unread: 0 },
-  { id: "c-3", title: "Casa Cook El Gouna", hotelId: "h-casa-cook", bookingId: "NZL-260902-5521", kind: "HOTEL", responseTime: "Typically replies within an hour", lastMessage: "Thank you for staying with us!", lastAt: "2026-09-06T12:00:00Z", unread: 0 },
-  { id: "c-4", title: "Kempinski Nile Hotel", hotelId: "h-kempinski", bookingId: "NZL-261102-1180", kind: "HOTEL", responseTime: "Typically replies within an hour", lastMessage: "Your late check-out is confirmed.", lastAt: "2026-11-01T18:00:00Z", unread: 0 },
+export const conversationsSeed: ConversationRecord[] = [
+  { id: "c-1", kind: "HOTEL", guestId: "u-nadia", hostId: "host-rixos", hotelId: "h-rixos-seagate", bookingId: "NZL-260519-8472", createdAt: "2026-11-01T09:00:00Z", lastMessage: "Of course. We’ve added that preference to your reservation — here is the sea-view wing we’ve allocated.", lastAt: "2026-11-02T10:42:00Z" },
+  { id: "c-2", kind: "SUPPORT", guestId: "u-nadia", hostId: "u-admin", createdAt: "2026-10-26T09:00:00Z", lastMessage: "Hi Nadia, this is Nuzul Support. How can we help with your trip?", lastAt: "2026-10-26T09:00:00Z" },
+  { id: "c-3", kind: "HOTEL", guestId: "u-nadia", hostId: "host-casacook", hotelId: "h-casa-cook", bookingId: "NZL-260902-5521", createdAt: "2026-09-02T09:00:00Z", lastMessage: "Thank you for staying with us!", lastAt: "2026-09-06T12:00:00Z" },
+  { id: "c-4", kind: "HOTEL", guestId: "u-nadia", hostId: "host-kemp", hotelId: "h-kempinski", bookingId: "NZL-261102-1180", createdAt: "2026-11-01T17:40:00Z", lastMessage: "Your late check-out is confirmed.", lastAt: "2026-11-01T18:00:00Z" },
+  { id: "c-5", kind: "HOTEL", guestId: "u-omar", hostId: "host-rixos", hotelId: "h-rixos-seagate", bookingId: "NZL-261104-2232", createdAt: "2026-11-01T20:00:00Z", lastMessage: "We’re arriving late on the 4th — around midnight. Is that okay?", lastAt: "2026-11-01T20:05:00Z" },
 ];
 
 export const messagesSeed: Message[] = [
-  { id: "m-1", conversationId: "c-1", from: "SYSTEM", text: "Booking confirmed · NZL-260519-8472. Check-in Sat 16 May from 3:00 PM. Reply here to reach the hotel directly.", sentAt: "2026-11-01T09:00:00Z", read: true },
-  { id: "m-2", conversationId: "c-1", from: "HOST", text: "Hello Nadia, we look forward to welcoming you to Sharm El Sheikh. Is there anything we can prepare for your arrival?", sentAt: "2026-11-02T10:38:00Z", read: true },
-  { id: "m-3", conversationId: "c-1", from: "GUEST", text: "A quiet room away from the evening entertainment would be wonderful, thank you.", sentAt: "2026-11-02T10:40:00Z", read: true },
-  { id: "m-4", conversationId: "c-1", from: "HOST", imageUrl: "https://images.unsplash.com/photo-1760067537740-faa11f7bdf1e?auto=format&fit=crop&w=800&q=70", text: "Of course. We’ve added that preference to your reservation — here is the sea-view wing we’ve allocated.", sentAt: "2026-11-02T10:42:00Z", read: false },
-  { id: "m-5", conversationId: "c-2", from: "HOST", text: "Hi Nadia, this is Nuzul Support. How can we help with your trip?", sentAt: "2026-10-26T09:00:00Z", read: true },
-  { id: "m-6", conversationId: "c-3", from: "SYSTEM", text: "Your stay is complete. Share a verified review within 14 days.", sentAt: "2026-09-06T11:00:00Z", read: true },
-  { id: "m-7", conversationId: "c-3", from: "HOST", text: "Thank you for staying with us!", sentAt: "2026-09-06T12:00:00Z", read: true },
-  { id: "m-8", conversationId: "c-4", from: "GUEST", text: "Could I check out at 2 PM on Wednesday?", sentAt: "2026-11-01T17:40:00Z", read: true },
-  { id: "m-9", conversationId: "c-4", from: "HOST", text: "Your late check-out is confirmed.", sentAt: "2026-11-01T18:00:00Z", read: true },
+  { id: "m-1", conversationId: "c-1", senderId: "system", text: "Booking confirmed · NZL-260519-8472. Check-in Sat 16 May from 3:00 PM. Reply here to reach the hotel directly.", sentAt: "2026-11-01T09:00:00Z", read: true },
+  { id: "m-2", conversationId: "c-1", senderId: "host-rixos", text: "Hello Nadia, we look forward to welcoming you to Sharm El Sheikh. Is there anything we can prepare for your arrival?", sentAt: "2026-11-02T10:38:00Z", read: true },
+  { id: "m-3", conversationId: "c-1", senderId: "u-nadia", text: "A quiet room away from the evening entertainment would be wonderful, thank you.", sentAt: "2026-11-02T10:40:00Z", read: true },
+  { id: "m-4", conversationId: "c-1", senderId: "host-rixos", imageUrl: "https://images.unsplash.com/photo-1760067537740-faa11f7bdf1e?auto=format&fit=crop&w=800&q=70", text: "Of course. We’ve added that preference to your reservation — here is the sea-view wing we’ve allocated.", sentAt: "2026-11-02T10:42:00Z", read: false },
+  { id: "m-5", conversationId: "c-2", senderId: "u-admin", text: "Hi Nadia, this is Nuzul Support. How can we help with your trip?", sentAt: "2026-10-26T09:00:00Z", read: true },
+  { id: "m-6", conversationId: "c-3", senderId: "system", text: "Your stay is complete. Share a verified review within 14 days.", sentAt: "2026-09-06T11:00:00Z", read: true },
+  { id: "m-7", conversationId: "c-3", senderId: "host-casacook", text: "Thank you for staying with us!", sentAt: "2026-09-06T12:00:00Z", read: true },
+  { id: "m-8", conversationId: "c-4", senderId: "u-nadia", text: "Could I check out at 2 PM on Wednesday?", sentAt: "2026-11-01T17:40:00Z", read: true },
+  { id: "m-9", conversationId: "c-4", senderId: "host-kemp", text: "Your late check-out is confirmed.", sentAt: "2026-11-01T18:00:00Z", read: true },
+  { id: "m-10", conversationId: "c-5", senderId: "system", text: "Booking request · NZL-261104-2232. The hotel confirms within 24 hours.", sentAt: "2026-11-01T20:00:00Z", read: true },
+  { id: "m-11", conversationId: "c-5", senderId: "u-omar", text: "We’re arriving late on the 4th — around midnight. Is that okay?", sentAt: "2026-11-01T20:05:00Z", read: false },
 ];
 
 export const notificationsSeed: AppNotification[] = [
-  { id: "n-1", type: "BOOKING_CONFIRMATION", title: "Booking confirmed · NZL-260519-8472", body: "Rixos Premium Seagate · 16–19 May · 2 guests", createdAt: "2026-11-02T08:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-260519-8472" },
-  { id: "n-2", type: "MESSAGE", title: "New message from Rixos Premium Seagate", body: "“We’ve added your quiet-room preference.”", createdAt: "2026-11-02T10:42:00Z", read: false, channels: ["IN_APP", "PUSH"], link: "/messages/c-1" },
-  { id: "n-3", type: "MATCH_RECOMMENDATION", title: "3 new stays above 90% match", body: "Based on Honeymoon · Premium · Spa & quiet", createdAt: "2026-11-01T09:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/search?sort=MATCH" },
-  { id: "n-4", type: "AVAILABILITY", title: "Casa Cook El Gouna has rooms for your saved dates", body: "From your “Red Sea escape” wishlist", createdAt: "2026-11-01T07:00:00Z", read: true, channels: ["IN_APP", "PUSH"], link: "/wishlists/wl-1" },
-  { id: "n-5", type: "PAYMENT", title: "Payment authorised", body: "Visa ending 4242 · captured at check-in", createdAt: "2026-10-31T12:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-260519-8472" },
-  { id: "n-6", type: "RESERVATION_CHANGE", title: "Late check-out approved", body: "Kempinski Nile Hotel · Wed 4 Nov until 2 PM", createdAt: "2026-11-01T18:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-261102-1180" },
-  { id: "n-7", type: "REVIEW_REMINDER", title: "How was Casa Cook El Gouna?", body: "Share a verified-stay review to help other guests", createdAt: "2026-09-07T09:00:00Z", read: true, channels: ["EMAIL"], link: "/trips?tab=COMPLETED" },
-  { id: "n-8", type: "CANCELLATION", title: "Reservation cancelled · full refund issued", body: "Kempinski Nile Hotel · EGP 23,700 returned to Visa 4242", createdAt: "2026-04-18T09:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips?tab=CANCELLED" },
-  { id: "n-9", type: "PROMOTION", title: "Long-stay season: up to 25% off monthly rates", body: "Selected Egyptian hotels · until 30 Nov", createdAt: "2026-10-15T09:00:00Z", read: true, channels: ["EMAIL"], link: "/search?mode=monthly" },
+  { recipientId: "u-nadia", id: "n-1", type: "BOOKING_CONFIRMATION", title: "Booking confirmed · NZL-260519-8472", body: "Rixos Premium Seagate · 16–19 May · 2 guests", createdAt: "2026-11-02T08:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-260519-8472" },
+  { recipientId: "u-nadia", id: "n-2", type: "MESSAGE", title: "New message from Rixos Premium Seagate", body: "“We’ve added your quiet-room preference.”", createdAt: "2026-11-02T10:42:00Z", read: false, channels: ["IN_APP", "PUSH"], link: "/messages/c-1" },
+  { recipientId: "u-nadia", id: "n-3", type: "MATCH_RECOMMENDATION", title: "3 new stays above 90% match", body: "Based on Honeymoon · Premium · Spa & quiet", createdAt: "2026-11-01T09:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/search?sort=MATCH" },
+  { recipientId: "u-nadia", id: "n-4", type: "AVAILABILITY", title: "Casa Cook El Gouna has rooms for your saved dates", body: "From your “Red Sea escape” wishlist", createdAt: "2026-11-01T07:00:00Z", read: true, channels: ["IN_APP", "PUSH"], link: "/wishlists/wl-1" },
+  { recipientId: "u-nadia", id: "n-5", type: "PAYMENT", title: "Payment authorised", body: "Visa ending 4242 · captured at check-in", createdAt: "2026-10-31T12:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-260519-8472" },
+  { recipientId: "u-nadia", id: "n-6", type: "RESERVATION_CHANGE", title: "Late check-out approved", body: "Kempinski Nile Hotel · Wed 4 Nov until 2 PM", createdAt: "2026-11-01T18:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips/NZL-261102-1180" },
+  { recipientId: "u-nadia", id: "n-7", type: "REVIEW_REMINDER", title: "How was Casa Cook El Gouna?", body: "Share a verified-stay review to help other guests", createdAt: "2026-09-07T09:00:00Z", read: true, channels: ["EMAIL"], link: "/trips?tab=COMPLETED" },
+  { recipientId: "u-nadia", id: "n-8", type: "CANCELLATION", title: "Reservation cancelled · full refund issued", body: "Kempinski Nile Hotel · EGP 23,700 returned to Visa 4242", createdAt: "2026-04-18T09:00:00Z", read: true, channels: ["IN_APP", "EMAIL"], link: "/trips?tab=CANCELLED" },
+  { recipientId: "u-nadia", id: "n-9", type: "PROMOTION", title: "Long-stay season: up to 25% off monthly rates", body: "Selected Egyptian hotels · until 30 Nov", createdAt: "2026-10-15T09:00:00Z", read: true, channels: ["EMAIL"], link: "/search?mode=monthly" },
+  { recipientId: "host-rixos", id: "n-h1", type: "BOOKING_CONFIRMATION", title: "New booking request · NZL-261104-2232", body: "Omar Selim · Junior Suite · 4–8 Nov · 3 guests", createdAt: "2026-11-01T20:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/host/reservations?state=PENDING" },
+  { recipientId: "host-rixos", id: "n-h2", type: "MESSAGE", title: "New message from Omar Selim", body: "“We’re arriving late on the 4th — around midnight.”", createdAt: "2026-11-01T20:05:00Z", read: false, channels: ["IN_APP", "PUSH"], link: "/host/messages/c-5" },
+  { recipientId: "u-admin", id: "n-a1", type: "RESERVATION_CHANGE", title: "2 properties awaiting verification", body: "Azure Bay Resort · Nile House", createdAt: "2026-11-02T07:00:00Z", read: false, channels: ["IN_APP", "EMAIL"], link: "/admin/hotels" },
 ];
 
 export const usersSeed: User[] = [
@@ -92,10 +102,21 @@ export const usersSeed: User[] = [
   { id: "u-omar", name: "Omar Selim", email: "omar@example.com", phone: "+20 101 222 3333", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2025-01-14", city: "Giza", bookings: 3 },
   { id: "u-lina", name: "Lina Farouk", email: "lina@example.com", phone: "+20 112 555 0101", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2025-06-01", city: "Alexandria", bookings: 4 },
   { id: "u-88213", name: "user_88213", email: "x8@temp-mail.example", phone: "—", role: "GUEST", status: "SUSPENDED", verification: "PENDING", joinedAt: "2026-10-24", city: "—", bookings: 0 },
-  { id: "u-rixos", name: "Rixos Hotels Egypt", email: "partners@rixos.example", phone: "+20 69 360 0000", role: "HOST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2024-02-10", city: "Sharm El Sheikh", bookings: 0 },
-  { id: "u-nilehouse", name: "Nile House Ltd.", email: "info@nilehouse.example", phone: "+20 95 237 0000", role: "HOST", status: "ACTIVE", verification: "PENDING", joinedAt: "2026-09-12", city: "Luxor", bookings: 0 },
+  { id: "host-rixos", name: "Rixos Hotels Egypt", email: "partners@rixos.example", phone: "+20 69 360 0000", role: "HOST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2024-02-10", city: "Sharm El Sheikh", bookings: 0 },
+  { id: "host-nilehouse", name: "Nile House Ltd.", email: "info@nilehouse.example", phone: "+20 95 237 0000", role: "HOST", status: "ACTIVE", verification: "PENDING", joinedAt: "2026-09-12", city: "Luxor", bookings: 0 },
+  { id: "u-james", name: "James Taylor", email: "james@example.com", phone: "+44 20 7946 0000", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2025-03-08", city: "London", bookings: 2 },
+  { id: "u-hassan", name: "M. Hassan", email: "hassan@example.com", phone: "+20 122 000 4444", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2025-08-19", city: "Cairo", bookings: 1 },
+  { id: "u-sara", name: "Sara Ibrahim", email: "sara@example.com", phone: "+20 100 777 8888", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2026-02-02", city: "Cairo", bookings: 1 },
+  { id: "host-azure", name: "Azure Bay Hospitality", email: "hello@azurebay.example", phone: "+20 65 000 1111", role: "HOST", status: "ACTIVE", verification: "PENDING", joinedAt: "2026-10-30", city: "Marsa Alam", bookings: 0 },
   { id: "u-admin", name: "Admin User", email: "ops@nuzul.example", phone: "+20 2 0000 0000", role: "ADMIN", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2024-01-01", city: "Cairo", bookings: 0 },
 ];
+
+// Every property references a real host account (§64): add an account for each seeded host.
+hotelsSeed.forEach((h) => {
+  if (usersSeed.some((u) => u.id === h.host.id)) return;
+  usersSeed.push({ id: h.host.id, name: h.host.name, email: `partners@${h.host.id.replace("host-", "")}.example`, phone: "+20 2 0000 0000", role: "HOST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2024-05-01", city: h.city, bookings: 0 });
+});
+
 
 export const reportsSeed: Report[] = [
   { id: "R-2041", type: "HOTEL", subject: "Azure Bay Resort", summary: "Photos don’t match the property", status: "OPEN", createdAt: "2026-11-02" },

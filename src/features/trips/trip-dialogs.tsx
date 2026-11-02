@@ -13,7 +13,9 @@ import { Textarea } from "@/components/ui/input";
 import { Field } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Counter } from "@/components/common";
-import { useCancelBooking, useChangeRequest, useSendMessage, useSubmitReview } from "@/hooks/queries";
+import { useCancelBooking, useChangeRequest, useSubmitReview } from "@/hooks/queries";
+import { messagingService } from "@/services/account.service";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDates, useMoney } from "@/hooks/use-format";
 import { refundPct } from "@/lib/pricing";
 import { daysUntil, nightsBetween, toISODate } from "@/lib/dates";
@@ -99,14 +101,25 @@ function ChangeBody({ booking: b, hotel: h, kind, onClose }: BodyProps & { kind:
 function HelpBody({ booking: b, onClose }: BodyProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const send = useSendMessage("c-2");
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  /** Opens (or reuses) the guest's Nuzul Support conversation and posts the issue with the reservation ID. */
+  const ask = async (text: string) => {
+    setBusy(true);
+    try {
+      const c = await messagingService.start({ kind: "SUPPORT" });
+      await messagingService.send(c.id, text);
+      void qc.invalidateQueries({ queryKey: ["me", "conversations"] });
+      toast.success(t("trips.helpSent")); onClose(); navigate(`/messages/${c.id}`);
+    } catch (e) { toast.error(errorMessage(e, t("errors.generic"))); } finally { setBusy(false); }
+  };
   const items = ["confirmation", "noReply", "room", "charge", "safety"] as const;
   return (
     <DialogContent title={t("trips.helpTitle")}>
       <div className="flex flex-col">
         {items.map((k) => (
-          <button key={k} type="button" disabled={send.isPending} className="flex items-center justify-between border-b border-line py-3.5 text-start text-[13px] text-navy hover:text-gold"
-            onClick={() => send.mutate(`${t(`trips.helpItems.${k}`)} — ${b.id}`, { onSuccess: () => { toast.success(t("trips.helpSent")); onClose(); navigate("/messages/c-2"); } })}>
+          <button key={k} type="button" disabled={busy} className="flex items-center justify-between border-b border-line py-3.5 text-start text-[13px] text-navy hover:text-gold"
+            onClick={() => void ask(`${t(`trips.helpItems.${k}`)} — ${b.id}`)}>
             {t(`trips.helpItems.${k}`)} <ArrowRight className="size-4 rtl:rotate-180" />
           </button>
         ))}

@@ -18,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Counter, ErrorState, Logo } from "@/components/common";
 import { MatchPill } from "@/components/match";
 import { useCreateBooking, useHotel } from "@/hooks/queries";
+import { hotelsService } from "@/services/catalog.service";
 import { useDates, useMoney } from "@/hooks/use-format";
 import { useSearch, totalGuests } from "@/stores/search.store";
 import { useSession } from "@/stores/session.store";
@@ -53,7 +54,7 @@ function Checkout({ hotel: h }: { hotel: NonNullable<ReturnType<typeof useHotel>
   const { t } = useTranslation();
   const navigate = useNavigate();
   const money = useMoney();
-  const { range } = useDates();
+  const { range, date } = useDates();
   const [params, setParams] = useSearchParams();
   const s = useSearch();
   const user = useSession((x) => x.user);
@@ -77,6 +78,13 @@ function Checkout({ hotel: h }: { hotel: NonNullable<ReturnType<typeof useHotel>
     if (n === 2) e = nights < 1 ? t("booking.v.nights") : nights < room.minStay ? t("booking.v.minStay", { room: room.name, n: room.minStay }) : nights > room.maxStay ? t("booking.v.maxStay", { n: room.maxStay }) : undefined;
     if (n === 3 && totalGuests(g) > room.capacity * g.rooms) e = t("booking.v.capacity", { rooms: g.rooms, room: room.name, n: room.capacity * g.rooms });
     if (n === 5 && !agree) e = t("booking.v.agree");
+    if (!e && (n === 2 || n === 3)) {
+      // Live check against the host calendar so closed dates / sold-out nights are caught before payment.
+      try {
+        const a = await hotelsService.availability(h.id, { roomId: room.id, checkIn: s.checkIn, checkOut: s.checkOut, rooms: g.rooms });
+        if (!a.available) e = a.blockedDates.length ? t("booking.v.unavailableDates", { dates: a.blockedDates.map((d) => date(d, "d MMM")).join(", ") }) : t("hotel.soldOutDates");
+      } catch { /* the server re-checks on submit */ }
+    }
     setStepError(e);
     if (e) return false;
     if (n === 6) return form.trigger();
@@ -97,6 +105,7 @@ function Checkout({ hotel: h }: { hotel: NonNullable<ReturnType<typeof useHotel>
         onError: (err) => {
           const e = err as unknown as ApiError;
           if (e.status === 402) setPayError(e.message);
+          else if (e.status === 409) { setPayError(e.message); if (e.code === "NOT_AVAILABLE") { setStep(2); setStepError(e.message); } }
           else if (applyFieldErrors(e, form.setError)) { setStep(6); }
           else setPayError(e.message ?? t("errors.generic"));
         },

@@ -1,5 +1,6 @@
 /* Room selection (§19, §24) — availability, capacity, min stay, room-level policy. */
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuthGate } from "@/components/auth/auth-gate";
 import { useTranslation } from "react-i18next";
 import { BedDouble, Bath, Ruler, Users } from "lucide-react";
 import type { HotelWithMatch } from "@/types/api";
@@ -17,6 +18,8 @@ export function RoomsSection({ hotel: h, nights }: { hotel: HotelWithMatch; nigh
   const money = useMoney();
   const guests = useSearch((s) => s.guests);
   const { data: profile } = useMatchProfile();
+  const gate = useAuthGate();
+  const navigate = useNavigate();
   return (
     <section id="sec-rooms">
       <SectionHeading eyebrow={t("hotel.sections.rooms")} title={t("hotel.chooseRoom")} sub={t("hotel.roomsSub", { nights, guests: totalGuests(guests) })} />
@@ -46,7 +49,7 @@ export function RoomsSection({ hotel: h, nights }: { hotel: HotelWithMatch; nigh
                 <div><b className="block text-xl text-navy">{money(r.nightlyPrice, h.currency)}</b><small className="text-[11px] text-ink-muted">{t("hotel.perNight")}</small>
                   <small className="block text-[11px] text-ink-muted">{t("hotel.forNights", { amount: money(r.nightlyPrice * nights, h.currency), nights })}</small></div>
                 {soldOut ? <Button disabled variant="outline" size="sm">{t("hotel.soldOut")}</Button>
-                  : <Button size="sm" asChild><Link to={bookPath(h.id, r.id)} title={tooShort ? t("hotel.minNights", { n: r.minStay }) : undefined}>{t("hotel.select")}</Link></Button>}
+                  : <Button size="sm" title={tooShort ? t("hotel.minNights", { n: r.minStay }) : undefined} onClick={() => gate("book", () => navigate(bookPath(h.id, r.id)), bookPath(h.id, r.id))}>{t("hotel.select")}</Button>}
               </div>
             </article>
           );

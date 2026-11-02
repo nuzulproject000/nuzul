@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useIsGuest } from "@/stores/session.store";
+import { useAuthGate } from "@/components/auth/auth-gate";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import useEmblaCarousel from "embla-carousel-react";
@@ -24,7 +26,9 @@ export function HotelCard({ hotel, nights = 3, showCompare = false, highlighted 
   const money = useMoney();
   const share = useShare();
   const locale = usePreferences((s) => s.locale);
-  const { data: wishlists } = useWishlists();
+  const isGuest = useIsGuest();
+  const gate = useAuthGate();
+  const { data: wishlists } = useWishlists(isGuest);
   const like = useToggleLike();
   const compare = useCompare();
   const saved = !!wishlists?.some((w) => w.hotelIds.includes(hotel.id));
@@ -38,7 +42,7 @@ export function HotelCard({ hotel, nights = 3, showCompare = false, highlighted 
 
   const toggleLike = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
-    like.mutate(hotel.id, { onSuccess: (r) => (r.liked ? toast.success(t("card.savedTo", { name: r.wishlistName })) : toast.info(t("card.removed"))) });
+    gate("save", () => like.mutate(hotel.id, { onSuccess: (r) => (r.liked ? toast.success(t("card.savedTo", { name: r.wishlistName })) : toast.info(t("card.removed"))) }));
   };
 
   return (

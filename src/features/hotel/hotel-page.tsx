@@ -1,4 +1,7 @@
 /* Hotel detail (§18–19, §24–28, §31, §37, §68). */
+import { errorMessage } from "@/lib/forms";
+import { useIsGuest } from "@/stores/session.store";
+import { useAuthGate } from "@/components/auth/auth-gate";
 import { track } from "@/lib/analytics";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -9,7 +12,7 @@ import type { HotelWithMatch } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { ErrorState, GuestFavoriteBadge, Rating, SectionHeading } from "@/components/common";
 import { MatchLarge, MatchPill, useMatchSummary, useReasonText } from "@/components/match";
-import { useHotelBySlug, useMatchProfile, useToggleLike, useWishlists } from "@/hooks/queries";
+import { useHotelBySlug, useMatchProfile, useStartConversation, useToggleLike, useWishlists } from "@/hooks/queries";
 import { useShare } from "@/hooks/use-share";
 import { useCompare } from "@/stores/compare.store";
 import { useSearch } from "@/stores/search.store";
@@ -41,7 +44,10 @@ function HotelView({ hotel: h }: { hotel: HotelWithMatch }) {
   const share = useShare();
   const s = useSearch();
   const { data: profile } = useMatchProfile();
-  const { data: wishlists } = useWishlists();
+  const isGuest = useIsGuest();
+  const gate = useAuthGate();
+  const startChat = useStartConversation();
+  const { data: wishlists } = useWishlists(isGuest);
   const like = useToggleLike();
   const compare = useCompare();
   const reason = useReasonText();
@@ -81,7 +87,7 @@ function HotelView({ hotel: h }: { hotel: HotelWithMatch }) {
         </div>
         <div className="flex items-center gap-2">
           <Button size="icon" aria-label={t("common.share")} onClick={() => void share(h.name, hotelPath(h))}><Share2 /></Button>
-          <Button size="icon" aria-pressed={saved} aria-label={saved ? t("card.removeFrom") : t("card.saveTo")} className={cn(saved && "border-gold text-gold")} onClick={() => like.mutate(h.id, { onSuccess: (r) => (r.liked ? toast.success(t("card.savedTo", { name: r.wishlistName })) : toast.info(t("card.removed"))) })}><Heart className={cn(saved && "fill-current")} /></Button>
+          <Button size="icon" aria-pressed={saved} aria-label={saved ? t("card.removeFrom") : t("card.saveTo")} className={cn(saved && "border-gold text-gold")} onClick={() => gate("save", () => like.mutate(h.id, { onSuccess: (r) => (r.liked ? toast.success(t("card.savedTo", { name: r.wishlistName })) : toast.info(t("card.removed"))) }))}><Heart className={cn(saved && "fill-current")} /></Button>
           <Button size="sm" variant={compare.ids.includes(h.id) ? "default" : "outline"} onClick={() => { if (!compare.toggle(h.id)) toast.info(t("results.compareLimit")); }}>{compare.ids.includes(h.id) ? <><Check /> {t("hotel.inCompare")}</> : t("hotel.addCompare")}</Button>
         </div>
       </header>
@@ -107,7 +113,7 @@ function HotelView({ hotel: h }: { hotel: HotelWithMatch }) {
               <span className="grid size-10 place-items-center rounded-full bg-sand text-xs font-bold text-navy">{h.host.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}</span>
               <div className="flex min-w-44 flex-1 flex-col"><b className="text-[13px] text-navy">{t("hotel.managedBy", { name: h.host.name })}</b><small className="mt-0.5 text-[11px] text-ink-muted">{t("hotel.responds", { time: h.host.responseTime, rate: h.host.responseRate })}</small></div>
               {h.host.badge && <span className="inline-flex items-center gap-1.5 rounded-full bg-navy px-2.5 py-1.5 text-[10px] font-bold text-sand"><Award className="size-3.5" /> {h.host.badge === "TOP_HOST" ? "Top Host" : "Highly Rated Host"}</span>}
-              <Button variant="outline" size="sm" onClick={() => navigate("/messages")}><MessageCircle /> {t("hotel.contact")}</Button>
+              <Button variant="outline" size="sm" disabled={startChat.isPending} onClick={() => gate("message", () => startChat.mutate({ hotelId: h.id }, { onSuccess: (c) => navigate(`/messages/${c.id}`), onError: (e) => toast.error(errorMessage(e, t("errors.generic"))) }))}><MessageCircle /> {t("hotel.contact")}</Button>
             </div>
           </section>
 

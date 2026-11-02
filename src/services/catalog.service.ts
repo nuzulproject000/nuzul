@@ -19,5 +19,6 @@ export const hotelsService = {
   compare: (ids: string[]) => unwrap<HotelWithMatch[]>(api.post("/hotels/compare", { ids })),
   flexibleDates: (id: string, checkIn: string, nights: number) => unwrap<FlexibleDateOption[]>(api.get(`/hotels/${id}/flexible-dates`, { params: { checkIn, nights } })),
   splitStays: (p: { destination?: string; checkIn: string; checkOut: string }) => unwrap<SplitStay[]>(api.get("/hotels/split-stays", { params: p })),
+  availability: (id: string, p: { roomId: string; checkIn: string; checkOut: string; rooms: number }) => unwrap<{ available: boolean; blockedDates: string[]; roomsLeft: number }>(api.get(`/hotels/${id}/availability`, { params: p })),
   reviews: (id: string, sort: ReviewSort, page = 1) => unwrap<Paginated<Review>>(api.get(`/hotels/${id}/reviews`, { params: { sort, page } })),
 };

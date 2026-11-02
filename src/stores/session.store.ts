@@ -1,25 +1,40 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { Role, User } from "@/types/models";
+import { sessionStore, setToken } from "@/services/auth-token";
 
-/** Mock session (§60). Production would use secure httpOnly cookies / JWT from the auth service. */
+/** Frontend demo session (§60). MOCK AUTHENTICATION: the token only names a demo account.
+ * Production replaces this with the identity provider's httpOnly session; nothing here is a security boundary. */
 type SessionState = {
   user: User | null;
-  role: Role;
-  signIn: (user: User, token: string) => void;
+  token: string | null;
+  keep: boolean;
+  signIn: (s: { user: User; token: string }, keep?: boolean) => void;
+  setUser: (u: User) => void;
   signOut: () => void;
-  setRole: (role: Role) => void;
 };
 
 export const useSession = create<SessionState>()(
   persist(
     (set) => ({
-      user: { id: "u-nadia", name: "Nadia Amin", email: "nadia@example.com", phone: "+20 100 000 0000", role: "GUEST", status: "ACTIVE", verification: "VERIFIED", joinedAt: "2024-03-02", city: "Cairo", bookings: 6 },
-      role: "GUEST",
-      signIn: (user, token) => { localStorage.setItem("nuzul.session", token); set({ user, role: user.role }); },
-      signOut: () => { localStorage.removeItem("nuzul.session"); set({ user: null, role: "GUEST" }); },
-      setRole: (role) => set({ role }),
+      user: null,
+      token: null,
+      keep: false,
+      signIn: ({ user, token }, keep = false) => { setToken(token); set({ user, token, keep }); },
+      setUser: (user) => set({ user }),
+      signOut: () => { setToken(null); set({ user: null, token: null, keep: false }); },
     }),
-    { name: "nuzul.session-state" },
+    {
+      name: "nuzul.session-state",
+      storage: createJSONStorage(() => sessionStore),
+      partialize: ({ user, token, keep }) => ({ user, token, keep }),
+      onRehydrateStorage: () => (s) => setToken(s?.token ?? null),
+    },
   ),
 );
+// Rehydration from web storage is synchronous; make sure the API client sees the token immediately.
+setToken(useSession.getState().token);
+
+export const roleHome = (role?: Role | null) => (role === "HOST" ? "/host" : role === "ADMIN" ? "/admin" : role === "GUEST" ? "/account" : "/");
+export const useRole = () => useSession((s) => s.user?.role ?? null);
+export const useIsGuest = () => useSession((s) => s.user?.role === "GUEST");

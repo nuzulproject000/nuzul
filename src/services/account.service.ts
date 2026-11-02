@@ -39,14 +39,14 @@ export const bookingService = {
   review: (id: string, body: { categories: Record<string, number>; text: string }) => unwrap(api.post(`/bookings/${id}/review`, body)),
 };
 
-export type MessagingScope = "guest" | "host";
-/** Same contract for both sides of a conversation; the host inbox lives under /host. */
+/** Conversations of the signed-in user, whatever their role (guest, host or support). */
 export const messagingService = {
-  conversations: (scope: MessagingScope = "guest") => unwrap<Conversation[]>(api.get(scope === "host" ? "/host/conversations" : "/me/conversations")),
+  conversations: () => unwrap<Conversation[]>(api.get("/conversations")),
+  start: (body: { hotelId?: string; bookingId?: string; kind?: "HOTEL" | "SUPPORT" }) => unwrap<Conversation>(api.post("/conversations", body)),
   messages: (conversationId: string) => unwrap<Message[]>(api.get(`/conversations/${conversationId}/messages`)),
-  send: (conversationId: string, text: string, scope: MessagingScope = "guest") => unwrap<Message>(api.post(`${scope === "host" ? "/host" : ""}/conversations/${conversationId}/messages`, { text })),
-  unsend: (messageId: string, scope: MessagingScope = "guest") => unwrap<Message>(api.post(`${scope === "host" ? "/host" : ""}/messages/${messageId}/unsend`)),
-  markRead: (conversationId: string, scope: MessagingScope = "guest") => unwrap(api.post(`${scope === "host" ? "/host" : ""}/conversations/${conversationId}/read`)),
+  send: (conversationId: string, text: string) => unwrap<Message>(api.post(`/conversations/${conversationId}/messages`, { text })),
+  unsend: (messageId: string) => unwrap<Message>(api.post(`/messages/${messageId}/unsend`)),
+  markRead: (conversationId: string) => unwrap(api.post(`/conversations/${conversationId}/read`)),
 };
 
 export const notificationService = {
@@ -57,9 +57,14 @@ export const notificationService = {
   savePreferences: (p: NotificationPrefs) => unwrap<NotificationPrefs>(api.put("/me/notification-preferences", p)),
 };
 
+export type DemoAccount = { id: string; name: string; email: string; role: User["role"]; status: User["status"] };
+/** MOCK AUTH — see README: demo accounts only, no real identity provider. */
 export const authService = {
-  login: (body: { email: string; password: string; role: string }) => unwrap<Session>(api.post("/auth/login", body)),
-  register: (body: { name: string; email: string; password: string; role: string }) => unwrap<{ status: string; email: string }>(api.post("/auth/register", body)),
-  forgotPassword: (email: string) => unwrap(api.post("/auth/forgot-password", { email })),
-  verifyEmail: (code: string) => unwrap(api.post("/auth/verify-email", { code })),
+  demoAccounts: () => unwrap<DemoAccount[]>(api.get("/auth/demo-accounts")),
+  login: (body: { email: string; password: string }) => unwrap<Session>(api.post("/auth/login", body)),
+  register: (body: { name: string; email: string; password: string; role: "GUEST" | "HOST" }) => unwrap<{ status: string; email: string }>(api.post("/auth/register", body)),
+  verifyEmail: (email: string, code: string) => unwrap<Session>(api.post("/auth/verify-email", { email, code })),
+  forgotPassword: (email: string) => unwrap<{ status: string; demoResetToken: string }>(api.post("/auth/forgot-password", { email })),
+  resetPassword: (body: { token: string; password: string; confirm: string }) => unwrap<{ status: string; email: string }>(api.post("/auth/reset-password", body)),
+  resetDemoData: () => unwrap<{ ok: true }>(api.post("/demo/reset")),
 };

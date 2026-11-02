@@ -21,7 +21,12 @@ export function route(method: string, pattern: string, handler: Handler) {
   routes.push({ method: method.toUpperCase(), re, keys, handler });
 }
 
-export function dispatch(method: string, url: string, body: unknown): MockResponse {
+/** Bearer token of the request being handled (handlers are synchronous, so this is safe). */
+let currentToken: string | null = null;
+export const requestToken = () => currentToken;
+
+export function dispatch(method: string, url: string, body: unknown, token: string | null = null): MockResponse {
+  currentToken = token;
   const u = new URL(url, "http://mock.local");
   const path = u.pathname.replace(/^\/v1/, "");
   for (const r of routes) {

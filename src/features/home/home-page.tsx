@@ -1,4 +1,5 @@
 /* Homepage — structure follows spec §75 exactly (15 blocks, in order). */
+import { useIsGuest } from "@/stores/session.store";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, BadgeCheck, Crosshair, Heart, MapPin, Search } from "lucide-react";
@@ -34,8 +35,9 @@ export default function HomePage() {
   const { data: categories } = useCategories();
   const { data: destinations } = useDestinations();
   const { data: profile } = useMatchProfile();
-  const { data: wishlists } = useWishlists();
-  const { data: bookings } = useMyBookings();
+  const isGuest = useIsGuest();
+  const { data: wishlists } = useWishlists(isGuest);
+  const { data: bookings } = useMyBookings(isGuest);
   const { data: popular } = useCollection("popular");
   const { data: nearby } = useCollection("nearby");
   const savedCount = new Set(wishlists?.flatMap((w) => w.hotelIds)).size;

@@ -83,12 +83,15 @@ export type Hotel = {
   checkIn: string;
   checkOut: string;
   status: "LIVE" | "PENDING" | "IN_REVIEW" | "SUSPENDED" | "REJECTED" | "DRAFT";
+  /** Admin feedback shown to the host when a listing is rejected or suspended (§50). */
+  moderationNote?: string;
 };
 
 export type Review = {
   id: string;
   hotelId: string;
   bookingId?: string;
+  authorId?: string;
   author: string;
   country: string;
   tripType: string;
@@ -110,6 +113,8 @@ export type Booking = {
   hotelId: string;
   roomId: string;
   guestId: string;
+  /** Owner of the property — the host account that manages this reservation. */
+  hostId: string;
   guestName: string;
   checkIn: string; // yyyy-MM-dd
   checkOut: string;
@@ -128,18 +133,22 @@ export type Booking = {
 
 export type PriceBreakdown = { room: number; cleaning: number; service: number; taxes: number; discount: number; total: number };
 
-export type Wishlist = { id: string; name: string; hotelIds: string[]; dates?: { checkIn: string; checkOut: string; guests: number }; privacy: "PRIVATE" | "SHARED"; collaborators: string[]; updatedAt: string };
+export type Wishlist = { id: string; ownerId: string; name: string; hotelIds: string[]; dates?: { checkIn: string; checkOut: string; guests: number }; privacy: "PRIVATE" | "SHARED"; collaborators: string[]; updatedAt: string };
 
-export type Message = { id: string; conversationId: string; from: "GUEST" | "HOST" | "SYSTEM"; text?: string; imageUrl?: string; sentAt: string; read: boolean; unsent?: boolean };
-export type Conversation = { id: string; title: string; hotelId?: string; bookingId?: string; kind: "HOTEL" | "SUPPORT"; responseTime: string; lastMessage: string; lastAt: string; unread: number };
+/** `senderId` is a user ID, or "system" for automated booking messages. `read` = read by the recipient. */
+export type Message = { id: string; conversationId: string; senderId: string; text?: string; imageUrl?: string; sentAt: string; read: boolean; unsent?: boolean };
+/** Stored conversation: always two participants (guest ↔ host, or guest/host ↔ Nuzul support). */
+export type ConversationRecord = { id: string; kind: "HOTEL" | "SUPPORT"; guestId: string; hostId: string; hotelId?: string; bookingId?: string; createdAt: string; lastMessage: string; lastAt: string };
+/** Conversation as returned to the signed-in participant. */
+export type Conversation = ConversationRecord & { title: string; counterpartId: string; counterpartName: string; responseTime: string; unread: number };
 
 export type NotificationType = "BOOKING_CONFIRMATION" | "PAYMENT" | "CANCELLATION" | "RESERVATION_CHANGE" | "MESSAGE" | "AVAILABILITY" | "REVIEW_REMINDER" | "MATCH_RECOMMENDATION" | "PROMOTION";
 export type NotificationChannel = "IN_APP" | "EMAIL" | "PUSH";
-export type AppNotification = { id: string; type: NotificationType; title: string; body: string; createdAt: string; read: boolean; channels: NotificationChannel[]; link?: string };
+export type AppNotification = { id: string; recipientId: string; type: NotificationType; title: string; body: string; createdAt: string; read: boolean; channels: NotificationChannel[]; link?: string };
 
 export type Category = { id: string; name: string; icon: string; active: boolean; order: number };
 
-export type User = { id: string; name: string; email: string; phone: string; role: Role; status: "ACTIVE" | "SUSPENDED"; verification: "VERIFIED" | "PENDING"; joinedAt: string; city: string; bookings: number };
+export type User = { id: string; name: string; email: string; phone: string; role: Role; status: "ACTIVE" | "SUSPENDED"; verification: "VERIFIED" | "PENDING"; joinedAt: string; city: string; bookings: number; statusReason?: string };
 
 export type Report = { id: string; type: "USER" | "HOTEL" | "FRAUD" | "ABUSE" | "PAYMENT"; subject: string; summary: string; status: "OPEN" | "IN_REVIEW" | "HIGH_PRIORITY" | "RESOLVED"; createdAt: string };
 

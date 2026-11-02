@@ -1,4 +1,4 @@
-/* Host inbox (§42) — same messaging UI, property-side scope. */
+/* Host inbox (§34) — the same shared conversations guests see, from the property side. */
 import { Inbox } from "@/features/messages/messages-page";
 
 export default function HostMessages() {

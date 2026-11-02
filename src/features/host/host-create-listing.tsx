@@ -42,7 +42,7 @@ export default function HostCreateListing() {
     return !Object.keys(e).length;
   };
   const next = () => validate() && setStep(step + 1);
-  const submit = () => create.mutate({ name: f.name, propertyType: f.type, city: f.city, area: f.area, description: f.description, amenities: f.amenities, accessibility: f.accessibility, cancellationPolicy: f.policy, fromPrice: f.price, monthlyDiscountPct: f.monthlyPct }, {
+  const submit = () => create.mutate({ name: f.name, propertyType: f.type, city: f.city, area: f.area, description: f.description, amenities: f.amenities, accessibility: f.accessibility, cancellationPolicy: f.policy, monthlyDiscountPct: f.monthlyPct, rooms: rooms.map((r) => ({ name: r.name, type: r.type, capacity: r.capacity, totalUnits: r.units, nightlyPrice: r.price, minStay: f.minStay, maxStay: f.maxStay })) }, {
     onSuccess: () => { toast.success(t("host.wizard.submitted")); navigate("/host/listings"); },
     onError: (e) => { setErr({ submit: errorMessage(e, t("errors.generic")) }); },
   });

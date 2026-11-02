@@ -13,22 +13,44 @@ Guest, Host and Admin experiences in English (LTR) and Arabic (RTL), desktop / t
 ```bash
 npm install          # Node ≥ 20 (Node ≥ 22.18 for scripts/i18n-check.mjs)
 npm run dev          # http://localhost:5173
-npm test             # Vitest: unit, API-contract and user-journey tests
+npm test             # Vitest: unit, API-contract, cross-role and user-journey tests
 npm run build        # type-check + production build to dist/
 npm run i18n:check   # every translation key used in src/ exists in en.ts and ar.ts
 ```
 
-Demo data: the mock database is seeded on first load and persisted in `localStorage` (`nuzul.mockdb`).
-Clear site data to reset. Useful test inputs:
+### Demo accounts and data (frontend only — mock authentication)
+
+The app opens as a **visitor**: anyone can browse, search, compare and read reviews. Saving, booking, messaging,
+reviews and the account area ask you to sign in and then bring you back to where you were.
+
+| Role | Email | Lands on |
+|---|---|---|
+| Guest | `nadia@example.com` | `/account` |
+| Host | `partners@rixos.example` | `/host` |
+| Admin | `ops@nuzul.example` | `/admin` |
+
+Any password of 8+ characters works (the sign-in page also has one-click demo buttons). Other seeded accounts:
+`james@example.com`, `hassan@example.com` (guests), `info@nilehouse.example` (host). New guest or host accounts can be
+created with **Sign up** (verification code: any 6 digits).
+
+**All roles share one demo dataset** in this browser (`localStorage` → `nuzul.mockdb`): a booking made by the guest appears in
+the host's reservations, a listing created by the host waits in the admin queue, an admin suspension hides the host's
+listings, and so on — with notifications to the right people. Sessions are **per tab** unless you tick “Keep me signed in”,
+so you can keep a guest tab and a host tab open side by side; changes sync between tabs.
+Use **Footer → Reset demo data** to restore the seed for everyone.
+
+> Mock authentication, payments, email and notifications are **simulated in the browser** for demonstration.
+> They are not secure and nothing leaves the device. See `docs/ARCHITECTURE.md` → *Backend responsibilities*.
+
+Useful test inputs:
 
 | Where | Input | Result |
 |---|---|---|
 | Sign in | password `wrongpassword` | 401 "Email or password is incorrect" |
 | Verify email | code `000000` | expired-code error (any other 6 digits succeed) |
+| Forgot password | any registered email | a demo reset link is shown on screen instead of being emailed |
 | Checkout → Payment | tick "simulate a declined payment" | 402 decline, no booking created |
-
-Roles: the session starts as a guest (Nadia). Use **Sign in** and pick Host or Admin, or open `/host` and `/admin`
-directly (route guards are a backend concern — see `docs/ARCHITECTURE.md`).
+| Host → Calendar | close a night | guests can no longer book stays that include it |
 
 ## Stack
 

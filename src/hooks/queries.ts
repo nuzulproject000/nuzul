@@ -5,7 +5,7 @@ import type { BookingState, Category, Hotel, NotificationPrefs, Wishlist } from 
 import type { MatchConfig, MatchProfile } from "@/lib/match-engine";
 import type { Question } from "@/services/questions";
 import { catalogService, hotelsService, type CollectionKind } from "@/services/catalog.service";
-import { bookingService, matchService, meService, messagingService, notificationService, wishlistService, type MessagingScope } from "@/services/account.service";
+import { bookingService, matchService, meService, messagingService, notificationService, wishlistService } from "@/services/account.service";
 import { adminService, hostService } from "@/services/ops.service";
 import { track } from "@/lib/analytics";
 
@@ -54,7 +54,7 @@ export const useFlexibleDates = (id: string, checkIn: string, nights: number, en
 export const useReviews = (id: string, sort: ReviewSort, page: number) => useQuery({ queryKey: qk.reviews(id, sort, page), queryFn: () => hotelsService.reviews(id, sort, page), placeholderData: keepPreviousData });
 
 /* ------------------------------------------------------ Match profile */
-export const useMe = () => useQuery({ queryKey: qk.me, queryFn: meService.get });
+export const useMe = (enabled = true) => useQuery({ queryKey: qk.me, queryFn: meService.get, enabled });
 export const useMyReviews = () => useQuery({ queryKey: ["me", "reviews"], queryFn: meService.reviews });
 export function useUpdateMe() {
   const qc = useQueryClient();
@@ -79,7 +79,7 @@ export function useResetProfile() {
 }
 
 /* ---------------------------------------------------------- Wishlists */
-export const useWishlists = () => useQuery({ queryKey: qk.wishlists, queryFn: wishlistService.list });
+export const useWishlists = (enabled = true) => useQuery({ queryKey: qk.wishlists, queryFn: wishlistService.list, enabled });
 function useWl<TVars, TRes>(fn: (v: TVars) => Promise<TRes>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSettled: () => qc.invalidateQueries({ queryKey: qk.wishlists }) });
@@ -110,7 +110,7 @@ export function useToggleLike() {
 }
 
 /* ----------------------------------------------------------- Bookings */
-export const useMyBookings = () => useQuery({ queryKey: qk.bookings, queryFn: bookingService.mine });
+export const useMyBookings = (enabled = true) => useQuery({ queryKey: qk.bookings, queryFn: bookingService.mine, enabled });
 export const useBooking = (id: string) => useQuery({ queryKey: qk.booking(id), queryFn: () => bookingService.get(id), enabled: !!id });
 function useBookingMutation<TVars, TRes>(fn: (v: TVars) => Promise<TRes>) {
   const qc = useQueryClient();
@@ -129,24 +129,27 @@ export function useSubmitReview() {
 }
 
 /* ---------------------------------------------------------- Messaging */
-const convKey = (scope: MessagingScope) => (scope === "host" ? ["host", "conversations"] : qk.conversations);
-export const useConversations = (scope: MessagingScope = "guest") => useQuery({ queryKey: convKey(scope), queryFn: () => messagingService.conversations(scope) });
-export const useMessages = (id: string) => useQuery({ queryKey: qk.messages(id), queryFn: () => messagingService.messages(id), enabled: !!id });
-export function useSendMessage(conversationId: string, scope: MessagingScope = "guest") {
+export const useConversations = (enabled = true) => useQuery({ queryKey: qk.conversations, queryFn: messagingService.conversations, enabled, refetchInterval: 15_000 });
+export const useMessages = (id: string) => useQuery({ queryKey: qk.messages(id), queryFn: () => messagingService.messages(id), enabled: !!id, refetchInterval: 10_000 });
+export function useStartConversation() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (text: string) => messagingService.send(conversationId, text, scope), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.messages(conversationId) }); qc.invalidateQueries({ queryKey: qk.conversations }); qc.invalidateQueries({ queryKey: ["host", "conversations"] }); } });
+  return useMutation({ mutationFn: messagingService.start, onSuccess: () => qc.invalidateQueries({ queryKey: qk.conversations }) });
 }
-export function useUnsend(conversationId: string, scope: MessagingScope = "guest") {
+export function useSendMessage(conversationId: string) {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (messageId: string) => messagingService.unsend(messageId, scope), onSuccess: () => qc.invalidateQueries({ queryKey: qk.messages(conversationId) }) });
+  return useMutation({ mutationFn: (text: string) => messagingService.send(conversationId, text), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.messages(conversationId) }); qc.invalidateQueries({ queryKey: qk.conversations }); } });
 }
-export function useMarkConversationRead(scope: MessagingScope = "guest") {
+export function useUnsend(conversationId: string) {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: string) => messagingService.markRead(id, scope), onSuccess: () => qc.invalidateQueries({ queryKey: convKey(scope) }) });
+  return useMutation({ mutationFn: (messageId: string) => messagingService.unsend(messageId), onSuccess: () => qc.invalidateQueries({ queryKey: qk.messages(conversationId) }) });
+}
+export function useMarkConversationRead() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => messagingService.markRead(id), onSuccess: () => { qc.invalidateQueries({ queryKey: qk.conversations }); qc.invalidateQueries({ queryKey: qk.notifications }); } });
 }
 
 /* ------------------------------------------------------ Notifications */
-export const useNotifications = () => useQuery({ queryKey: qk.notifications, queryFn: notificationService.list });
+export const useNotifications = (enabled = true) => useQuery({ queryKey: qk.notifications, queryFn: notificationService.list, enabled, refetchInterval: 20_000 });
 export const useNotificationPrefs = () => useQuery({ queryKey: qk.notificationPrefs, queryFn: notificationService.preferences });
 export function useMarkNotificationRead() {
   const qc = useQueryClient();
@@ -170,7 +173,7 @@ export function useHostMutation<TVars, TRes>(fn: (v: TVars) => Promise<TRes>, ex
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSuccess: () => { qc.invalidateQueries({ queryKey: ["host"] }); qc.invalidateQueries({ queryKey: qk.hotels }); extraKeys.forEach((k) => qc.invalidateQueries({ queryKey: k })); } });
 }
-export const useUpdateHostHotel = () => useHostMutation(({ id, patch }: { id: string; patch: Partial<Hotel> }) => hostService.updateHotel(id, patch));
+export const useUpdateHostHotel = () => useHostMutation(({ id, patch }: { id: string; patch: Partial<Hotel> & { resubmit?: boolean } }) => hostService.updateHotel(id, patch));
 
 /* -------------------------------------------------------------- Admin */
 export const useAdminStats = () => useQuery({ queryKey: qk.admin.stats, queryFn: adminService.stats });

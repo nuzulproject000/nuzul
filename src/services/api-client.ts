@@ -3,6 +3,7 @@
  * VITE_API_BASE_URL to a real server and no UI code needs to change. */
 import axios, { AxiosError } from "axios";
 import type { ApiError } from "@/types/api";
+import { getToken } from "./auth-token";
 
 const useMocks = import.meta.env.VITE_USE_MOCKS !== "false";
 
@@ -15,10 +16,16 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("nuzul.session");
+  const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   config.headers["Accept-Language"] = document.documentElement.lang || "en";
   return config;
+});
+
+/** A 401 while holding a token means the session ended (expired / revoked) — tell the app. */
+api.interceptors.response.use(undefined, (err: AxiosError<ApiError>) => {
+  if (err.response?.status === 401 && getToken() && typeof window !== "undefined") window.dispatchEvent(new CustomEvent("nuzul:session-expired"));
+  return Promise.reject(err);
 });
 
 /** Normalise every failure into the ApiError contract. */

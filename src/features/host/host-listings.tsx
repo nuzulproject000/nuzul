@@ -31,6 +31,7 @@ export default function HostListings() {
   const [params, setParams] = useSearchParams();
   const { data, isLoading, error, refetch } = useHostHotels();
   const editing = data?.find((h) => h.id === params.get("edit"));
+  const resubmit = useUpdateHostHotel();
   if (error) return <ErrorState error={error} onRetry={() => void refetch()} />;
   return (
     <>
@@ -38,12 +39,12 @@ export default function HostListings() {
       {isLoading ? <div className="skeleton h-60" /> : (
         <DataTable caption={t("host.listings.title")} rows={data ?? []} rowKey={(h) => h.id} empty={<EmptyState title={t("host.listings.empty")} text={t("host.listings.emptyText")} action={t("host.addListing")} onAction={() => navigate("/host/listings/new")} />} cols={[
           { head: t("host.col.property"), cell: (h) => <span className="flex items-center gap-3"><img src={h.images[0]} alt="" className="h-10 w-14 object-cover" /><span className="flex flex-col"><b className="text-navy">{h.name}</b><small className="text-ink-muted">{h.city}</small></span></span> },
-          { head: t("common.status"), cell: (h) => <Badge tone={STATUS_TONE[h.status]}>{t(`host.status.${h.status}`)}</Badge> },
+          { head: t("common.status"), cell: (h) => <span className="flex max-w-56 flex-col items-start gap-1"><Badge tone={STATUS_TONE[h.status]}>{t(`host.status.${h.status}`)}</Badge>{h.moderationNote && h.status !== "LIVE" && <small className="text-[10px] text-error">{h.moderationNote}</small>}{["PENDING", "IN_REVIEW"].includes(h.status) && <small className="text-[10px] text-ink-muted">{t("host.listings.awaiting")}</small>}</span> },
           { head: t("host.col.verification"), cell: (h) => <Badge tone={h.verification === "BASIC" ? "neutral" : "success"}>{t(`host.verification.${h.verification}`)}</Badge> },
           { head: t("host.col.rooms"), cell: (h) => t("host.roomTypes", { count: h.rooms.length }) },
           { head: t("match.rating"), cell: (h) => (h.reviewCount ? `★ ${h.rating}` : t("host.new")) },
           { head: t("host.col.completion"), cell: (h) => <span className="flex items-center gap-2"><Bar value={completion(h)} className="w-20" label={t("host.col.completion")} /> {completion(h)}%</span> },
-          { head: "", cell: (h) => <Button size="sm" variant="outline" onClick={() => setParams({ edit: h.id })}><Pencil /> {t("common.edit")}</Button> },
+          { head: "", cell: (h) => <span className="flex flex-wrap gap-1.5"><Button size="sm" variant="outline" onClick={() => setParams({ edit: h.id })}><Pencil /> {t("common.edit")}</Button>{h.status === "REJECTED" && <Button size="sm" onClick={() => resubmit.mutate({ id: h.id, patch: { resubmit: true } }, { onSuccess: () => toast.success(t("host.listings.resubmitted")) })}>{t("host.listings.resubmit")}</Button>}</span> },
         ]} />
       )}
       {editing && <Editor key={editing.id} hotel={editing} onClose={() => setParams({})} />}
