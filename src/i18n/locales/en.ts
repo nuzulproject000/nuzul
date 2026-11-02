@@ -66,7 +66,7 @@ const en = {
     proof1: "Explainable, never a black box", proof1Sub: "See what fits, and what may not — including price and noise.", proof2: "Hotels can’t buy a higher score", proof2Sub: "Weights are set by Nuzul and shown in every breakdown.",
     progress: "Question {{n}} of {{total}} · {{category}}", skip: "Skip", show: "Show my matches", picks: "{{n}}/{{max}} selected",
   },
-  results: {
+  results: { splitStay: { note: "Each stay is a separate reservation with its own cancellation policy. Totals include fees and taxes.", avg: "Average match {{pct}}%", leg: "Stay {{n}}", sub: "Spend your trip across two well-matched hotels", title: "Split stays",},
     finding: "Finding stays…", count_one: "{{count}} stay to consider", count_other: "{{count}} stays to consider", alternatives: "{{count}} in {{place}}, plus alternatives",
     meta: "Ranked by relevance, availability, price, quality and your Match Score · total prices include fees & taxes · sample data", sort: "Sort",
     sortBy: { RECOMMENDED: "Recommended", MATCH: "Match Score", PRICE_ASC: "Price: low to high", PRICE_DESC: "Price: high to low", RATING: "Guest rating", DISTANCE: "Distance", REVIEWS: "Most reviewed", POPULARITY: "Popularity" },

@@ -11,8 +11,9 @@ import { Select } from "@/components/ui/select";
 import { CardSkeleton, Chip, EmptyState, ErrorState, Pagination } from "@/components/common";
 import { HotelCard } from "@/components/hotel/hotel-card";
 import { SearchBar } from "@/features/search/search-bar";
-import { useCategories, useCompareHotels, useFlexibleDates, useHotelSearch } from "@/hooks/queries";
-import { useMoney } from "@/hooks/use-format";
+import { useCategories, useCompareHotels, useFlexibleDates, useHotelSearch, useSplitStays } from "@/hooks/queries";
+import { useDates, useMoney } from "@/hooks/use-format";
+import { hotelPath } from "@/app/paths";
 import { useCompare } from "@/stores/compare.store";
 import { useSearch } from "@/stores/search.store";
 import { nightsBetween } from "@/lib/dates";
@@ -105,6 +106,7 @@ export default function ResultsPage() {
             </label>
           </div>
           {(s.mode === "FLEXIBLE" || s.flexibility > 0) && data?.items[0] && <FlexStrip hotelId={data.items[0].id} nights={Math.max(1, nightsBetween(s.checkIn, s.checkOut))} />}
+          {s.mode === "DATES" && !isMonthly && nights >= 4 && <SplitStays destination={dest} checkIn={s.checkIn} checkOut={s.checkOut} />}
           {isMonthly && <div className="mb-6 flex items-start gap-2.5 bg-soft px-4 py-3.5 text-[12px] leading-relaxed text-navy"><CalendarDays className="size-[18px] shrink-0 text-gold" /><span><b>{t("results.monthly")}</b> · {t("results.monthlyText")}</span></div>}
 
           {error ? <ErrorState title={t("results.error")} error={error} onRetry={() => void refetch()} />
@@ -126,6 +128,34 @@ export default function ResultsPage() {
       <CompareTray />
       <FiltersSheet open={sheet} onOpenChange={setSheet} value={filters} onApply={setFilters} base={base} />
     </div>
+  );
+}
+
+/** Split stays (§81): spend the trip across two well-matched hotels. Each leg is booked separately. */
+function SplitStays({ destination, checkIn, checkOut }: { destination: string; checkIn: string; checkOut: string }) {
+  const { t } = useTranslation();
+  const money = useMoney();
+  const { range } = useDates();
+  const { data } = useSplitStays({ destination: destination || undefined, checkIn, checkOut }, !!checkIn && !!checkOut);
+  if (!data?.length) return null;
+  return (
+    <section aria-label={t("results.splitStay.title")} className="mb-7 border border-line bg-paper p-4">
+      <p className="mb-3 flex flex-wrap items-baseline gap-x-2 text-[12px] text-navy"><b>{t("results.splitStay.title")}</b><span className="text-ink-muted">{t("results.splitStay.sub")}</span></p>
+      <div className="scrollbar-none flex gap-3 overflow-x-auto">
+        {data.map((p) => (
+          <article key={p.legs.map((l) => l.hotel.id).join()} className="flex min-w-[300px] flex-1 flex-col gap-2 border border-line p-3">
+            {p.legs.map((l, i) => (
+              <Link key={l.hotel.id} to={`${hotelPath(l.hotel)}`} onClick={() => useSearch.getState().set({ checkIn: l.checkIn, checkOut: l.checkOut })} className="flex items-center gap-3 hover:text-gold">
+                <img src={l.hotel.images[0]} alt="" className="h-12 w-16 shrink-0 object-cover" />
+                <span className="flex min-w-0 flex-1 flex-col"><small className="text-[9px] font-bold tracking-widest text-gold uppercase">{t("results.splitStay.leg", { n: i + 1 })} · {range(l.checkIn, l.checkOut)}</small><b className="truncate text-[12px] text-navy">{l.hotel.name}</b><small className="text-[11px] text-ink-muted">{money(l.total, l.currency)} · {l.hotel.match.score}%</small></span>
+              </Link>
+            ))}
+            <p className="m-0 mt-auto flex items-center justify-between border-t border-line pt-2 text-[12px] text-navy"><span>{t("results.splitStay.avg", { pct: p.averageMatch })}</span><b>{money(p.totalEGP, "EGP")}</b></p>
+          </article>
+        ))}
+      </div>
+      <p className="mt-2 mb-0 text-[11px] text-ink-muted">{t("results.splitStay.note")}</p>
+    </section>
   );
 }
 

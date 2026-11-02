@@ -91,6 +91,25 @@ route("GET", "/hotels/collections/:kind", ({ params }) => {
   }
 });
 
+/* Split stays (§81): two hotels in the destination across one trip, ranked by average Match then total. */
+route("GET", "/hotels/split-stays", ({ query }) => {
+  const dest = query.get("destination") ?? "";
+  const checkIn = query.get("checkIn") ?? "", checkOut = query.get("checkOut") ?? "";
+  const nights = nightsBetween(checkIn, checkOut);
+  if (nights < 4) return [];
+  const first = Math.ceil(nights / 2);
+  const mid = new Date(checkIn); mid.setDate(mid.getDate() + first);
+  const split = mid.toISOString().slice(0, 10);
+  const pool = live().filter((h) => h.available && (!dest || h.city === dest || h.country === dest)).map(withMatch);
+  const pairs = pool.flatMap((a) => pool.filter((b) => b.id !== a.id).map((b) => {
+    const legs = [{ hotel: a, checkIn, checkOut: split, nights: first }, { hotel: b, checkIn: split, checkOut, nights: nights - first }]
+      .map((l) => ({ ...l, total: computePrice(l.hotel.fromPrice, l.nights, { longStayPct: l.hotel.monthlyDiscountPct }).total, currency: l.hotel.currency }));
+    return { legs, averageMatch: Math.round((a.match.score + b.match.score) / 2), totalEGP: legs.reduce((n, l) => n + toEGP(l.total, l.currency), 0) };
+  }));
+  const seen = new Set<string>();
+  return pairs.sort((x, y) => y.averageMatch - x.averageMatch || x.totalEGP - y.totalEGP)
+    .filter((p) => { const k = p.legs.map((l) => l.hotel.id).sort().join(); return !seen.has(k) && !!seen.add(k); }).slice(0, 3);
+});
 route("GET", "/hotels/by-slug", ({ query }) => {
   const h = getDb().hotels.find((x) => x.slug === query.get("slug"));
   if (!h) throw notFound("Hotel");

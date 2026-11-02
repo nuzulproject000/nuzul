@@ -68,3 +68,6 @@ export type SearchResponse = Paginated<HotelWithMatch> & { inDestination: number
 export type Suggestion = { label: string; kind: "CITY" | "COUNTRY" | "HOTEL" | "LANDMARK" | "NEARBY"; sub: string; value: string };
 export type FlexibleDateOption = { checkIn: string; nights: number; total: number; currency: Hotel["currency"]; matchScore: number };
 export type Session = { token: string; user: User };
+
+/** GET /hotels/split-stays — one trip split across two hotels (§81). */
+export type SplitStay = { legs: { hotel: HotelWithMatch; checkIn: string; checkOut: string; nights: number; total: number; currency: Hotel["currency"] }[]; averageMatch: number; totalEGP: number };

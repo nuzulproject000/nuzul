@@ -108,3 +108,18 @@ describe("auth (§60)", () => {
     expect((await authService.login({ email: "a@b.co", password: "correct-horse", role: "HOST" })).user.role).toBe("HOST");
   });
 });
+
+describe("split stays (§81)", () => {
+  it("offers distinct hotel pairs covering the whole trip", async () => {
+    const r = await hotelsService.splitStays({ destination: "Sharm El Sheikh", checkIn: "2027-01-10", checkOut: "2027-01-16" });
+    expect(r.length).toBeGreaterThan(0);
+    for (const p of r) {
+      expect(p.legs[0].checkIn).toBe("2027-01-10");
+      expect(p.legs[1].checkOut).toBe("2027-01-16");
+      expect(p.legs[0].checkOut).toBe(p.legs[1].checkIn);
+      expect(p.legs[0].hotel.id).not.toBe(p.legs[1].hotel.id);
+    }
+    expect(new Set(r.map((p) => p.legs.map((l) => l.hotel.id).sort().join())).size).toBe(r.length);
+    expect(await hotelsService.splitStays({ checkIn: "2027-01-10", checkOut: "2027-01-12" })).toEqual([]);
+  });
+});

@@ -1,5 +1,5 @@
 import type { Category } from "@/types/models";
-import type { FlexibleDateOption, HotelSearchParams, HotelWithMatch, Paginated, ReviewSort, SearchResponse, Suggestion } from "@/types/api";
+import type { SplitStay, FlexibleDateOption, HotelSearchParams, HotelWithMatch, Paginated, ReviewSort, SearchResponse, Suggestion } from "@/types/api";
 import type { Review } from "@/types/models";
 import { api, unwrap } from "./api-client";
 
@@ -18,5 +18,6 @@ export const hotelsService = {
   bySlug: (slug: string) => unwrap<HotelWithMatch>(api.get("/hotels/by-slug", { params: { slug } })),
   compare: (ids: string[]) => unwrap<HotelWithMatch[]>(api.post("/hotels/compare", { ids })),
   flexibleDates: (id: string, checkIn: string, nights: number) => unwrap<FlexibleDateOption[]>(api.get(`/hotels/${id}/flexible-dates`, { params: { checkIn, nights } })),
+  splitStays: (p: { destination?: string; checkIn: string; checkOut: string }) => unwrap<SplitStay[]>(api.get("/hotels/split-stays", { params: p })),
   reviews: (id: string, sort: ReviewSort, page = 1) => unwrap<Paginated<Review>>(api.get(`/hotels/${id}/reviews`, { params: { sort, page } })),
 };
