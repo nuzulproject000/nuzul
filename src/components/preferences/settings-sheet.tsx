@@ -18,7 +18,7 @@ const LANGUAGES: { code: Locale; label: string; lang: string }[] = [
 function Option({ selected, onSelect, children, lang }: { selected: boolean; onSelect: () => void; children: React.ReactNode; lang?: string }) {
   return (
     <button type="button" role="radio" aria-checked={selected} lang={lang} onClick={onSelect}
-      className={cn("flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-3.5 text-start text-[14px] text-navy transition-colors duration-150 hover:bg-soft/70", selected && "bg-soft font-semibold")}>
+      className={cn("flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-3.5 text-start text-[14px] text-navy transition-colors duration-150 hover:opacity-80", selected && "bg-soft font-semibold")}>
       <span className="flex flex-1 items-center gap-3">{children}</span>
       {selected && <Check className="size-[18px] text-gold" />}
     </button>
@@ -46,7 +46,7 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
             <span aria-hidden className="mx-auto block h-1 w-10 rounded-full bg-line" />
             <div className="mt-3 flex items-center justify-between">
               <DialogPrimitive.Title className="text-lg font-bold text-navy">{t("nav.settings")}</DialogPrimitive.Title>
-              <DialogPrimitive.Close className="grid size-9 cursor-pointer place-items-center rounded-full text-navy transition-colors duration-150 hover:bg-soft" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
+              <DialogPrimitive.Close className="grid size-9 cursor-pointer place-items-center rounded-full text-navy transition-colors duration-150 hover:opacity-80" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
             </div>
             <DialogPrimitive.Description className="sr-only">{t("prefs.sheetText")}</DialogPrimitive.Description>
           </div>

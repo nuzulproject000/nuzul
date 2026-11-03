@@ -42,7 +42,7 @@ export default function WishlistsPage() {
       {!lists?.length ? <EmptyState icon={<Heart />} title={t("wishlists.emptyTitle")} text={t("wishlists.emptyText")} action={t("wishlists.findStays")} onAction={() => navigate("/search")} /> : <>
         <div role="tablist" aria-label={t("wishlists.title")} className="scrollbar-none mb-8 flex gap-3 overflow-x-auto pb-1">
           {lists.map((w) => (
-            <button key={w.id} role="tab" type="button" aria-selected={w.id === active?.id} onClick={() => select(w.id)} className={cn("flex min-w-[220px] items-center gap-3 border p-2.5 text-start", w.id === active?.id ? "border-gold bg-paper shadow-[inset_0_0_0_1px_var(--gold)]" : "border-line hover:bg-paper")}>
+            <button key={w.id} role="tab" type="button" aria-selected={w.id === active?.id} onClick={() => select(w.id)} className={cn("flex min-w-[220px] items-center gap-3 border p-2.5 text-start", w.id === active?.id ? "border-gold bg-paper shadow-[inset_0_0_0_1px_var(--gold)]" : "border-line hover:opacity-80")}>
               <Thumb ids={w.hotelIds} />
               <span className="flex flex-col"><b className="text-[13px] text-navy">{w.name}</b><small className="text-[11px] text-ink-muted">{t("wishlists.stays", { count: w.hotelIds.length })} · {w.privacy === "SHARED" ? t("wishlists.shared") : t("wishlists.private")}</small></span>
             </button>
@@ -105,7 +105,7 @@ function ListView({ w, onDialog }: { w: Wishlist; onDialog: (d: DialogKind) => v
       {isLoading && w.hotelIds.length ? <div className="grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1">{[0, 1, 2].map((i) => <CardSkeleton key={i} />)}</div>
         : items.length === 0 ? <EmptyState icon={<Heart />} title={availOnly && w.hotelIds.length ? t("wishlists.noneAvailable") : t("wishlists.emptyList")} text={availOnly && w.hotelIds.length ? t("wishlists.noneAvailableText") : t("wishlists.emptyListText")} action={t("wishlists.findStays")} onAction={() => navigate("/search")} />
         : <div className="grid grid-cols-3 gap-x-6 gap-y-10 max-lg:grid-cols-2 max-sm:grid-cols-1">
-          {items.map((h) => <div key={h.id} className="flex flex-col gap-2"><HotelCard hotel={h} showCompare /><Button variant="text" size="sm" className="self-start" onClick={() => onDialog({ move: h.id })}>{t("wishlists.move")} <ArrowRight className="rtl:rotate-180" /></Button></div>)}
+          {items.map((h) => <div key={h.id} className="flex flex-col gap-2"><HotelCard hotel={h} showCompare className="flex-1" /><Button variant="text" size="sm" className="self-start" onClick={() => onDialog({ move: h.id })}>{t("wishlists.move")} <ArrowRight className="rtl:rotate-180" /></Button></div>)}
         </div>}
     </>
   );

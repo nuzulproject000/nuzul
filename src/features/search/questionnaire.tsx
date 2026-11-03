@@ -59,8 +59,10 @@ export function Questionnaire() {
   };
 
   return (
-    <section aria-labelledby="quiz-title" className="grid min-h-[500px] grid-cols-[1fr_1.08fr] bg-navy p-[clamp(40px,4vw,88px)] max-lg:p-10 max-md:block max-md:min-h-0 max-md:p-0">
-      <div className="py-8 ps-2 pe-[clamp(32px,4vw,96px)] max-lg:pe-8 max-md:px-5 max-md:pt-10 max-md:pb-8">
+    <section aria-labelledby="quiz-title" className="w-full bg-navy">
+      {/* Full-bleed navy band; content is padded and only lightly constrained so the card grows with the screen */}
+      <div className="mx-auto grid min-h-[500px] max-w-[2000px] grid-cols-[1fr_1.08fr] items-center gap-[clamp(32px,4vw,96px)] px-[clamp(24px,5vw,128px)] py-[clamp(40px,5vw,104px)] max-md:block max-md:min-h-0 max-md:p-0">
+      <div className="py-8 max-md:px-5 max-md:pt-10 max-md:pb-8">
         <span className="eyebrow eyebrow-light">{t("quiz.eyebrow", { count: questions.length })}</span>
         <h2 id="quiz-title" className="text-ivory max-md:text-[28px]">{t("quiz.title1")}<br />{t("quiz.title2")}</h2>
         <p className="max-w-md text-[#b6bdc7]">{t("quiz.lead")}</p>
@@ -81,7 +83,7 @@ export function Questionnaire() {
         <div role={q.type === "SINGLE" ? "radiogroup" : "group"} aria-label={q.title} className="mt-6 mb-8 grid grid-cols-3 gap-2.5 max-md:grid-cols-2">
           {q.options.map((o) => { const on = picked.includes(o.value); return (
             <button key={o.value} type="button" role={q.type === "SINGLE" ? "radio" : undefined} aria-checked={q.type === "SINGLE" ? on : undefined} aria-pressed={q.type === "MULTI" ? on : undefined}
-              onClick={() => choose(o.value)} className={cn("flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-1.5 border px-2 text-[12px] text-navy transition-colors duration-150", on ? "border-gold bg-sand font-bold" : "border-line hover:bg-soft/60")}>
+              onClick={() => choose(o.value)} className={cn("flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-1.5 border px-2 text-[12px] text-navy transition-colors duration-150", on ? "border-gold bg-sand font-bold" : "border-line hover:opacity-80")}>
               {on && <Check className="size-4" />} {o.label}
             </button>
           ); })}
@@ -95,6 +97,7 @@ export function Questionnaire() {
               : <Button variant="gold" className={QUIZ_BTN} disabled={save.isPending} onClick={finish}>{t("quiz.show")} <ArrowRight className="rtl:rotate-180" /></Button>}
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

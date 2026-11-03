@@ -14,7 +14,10 @@ import { useAuthGate } from "@/components/auth/auth-gate";
 import { cn, initials } from "@/lib/utils";
 import { CurrencyMenu } from "@/components/preferences/currency-menu";
 
-/** True once the page has scrolled — drives the header shadow. */
+/** Routes that open with a full-bleed hero image: the header overlays it while at the top. */
+export const HERO_ROUTES = ["/"];
+
+/** True once the page has scrolled — drives the header shadow / solid state. */
 function useScrolled(threshold = 4) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -48,35 +51,38 @@ export function Header() {
   const go = (to: string) => gate("account", () => navigate(to), to);
   const signOutNow = () => { signOut(); navigate("/", { replace: true }); };
   const scrolled = useScrolled();
+  /** Transparent header with white content over the hero, until the page scrolls. */
+  const overlay = HERO_ROUTES.includes(loc.pathname) && !scrolled;
+  const ink = overlay ? "text-white" : "text-charcoal";
 
   return (
-    <header className={cn("sticky top-0 z-40 border-b bg-ivory transition-[box-shadow,border-color] duration-200", scrolled ? "border-line/70 shadow-[0_6px_24px_rgb(15_28_46/.08)]" : "border-sand/30")}>
+    <header data-overlay={overlay || undefined} className={cn("sticky top-0 z-40 border-b transition-[background-color,box-shadow,border-color] duration-200", overlay ? "border-transparent bg-transparent" : scrolled ? "border-line/70 bg-ivory shadow-[0_6px_24px_rgb(15_28_46/.08)]" : "border-sand/30 bg-ivory")}>
       <div className="mx-auto flex h-[calc(var(--header-h)-1px)] max-w-[1440px] items-center justify-between gap-4 px-12 max-lg:px-6 max-md:px-4">
-        <Link to="/" aria-label="Nuzul home"><Logo /></Link>
+        <Link to="/" aria-label="Nuzul home" className="transition-colors duration-200"><Logo light={overlay} /></Link>
         <nav aria-label="Main" className="flex gap-9 max-lg:hidden">
           {nav.map((n) => n.guest && !user ? (
-            <button key={n.to} type="button" onClick={() => go(n.to)} className="relative py-2.5 text-xs font-semibold text-charcoal">{t(`nav.${n.key}`)}</button>
+            <button key={n.to} type="button" onClick={() => go(n.to)} className={cn("relative py-2.5 text-xs font-semibold transition-colors duration-200 hover:opacity-80", ink)}>{t(`nav.${n.key}`)}</button>
           ) : (
-            <NavLink key={n.to} to={n.to} end={"end" in n} className={({ isActive }) => cn("relative py-2.5 text-xs font-semibold text-charcoal", isActive && "text-gold after:absolute after:inset-x-0 after:-bottom-[17px] after:h-0.5 after:bg-gold")}>
+            <NavLink key={n.to} to={n.to} end={"end" in n} className={({ isActive }) => cn("relative py-2.5 text-xs font-semibold transition-colors duration-200 hover:opacity-80", ink, isActive && (overlay ? "text-sand after:absolute after:inset-x-0 after:-bottom-[17px] after:h-0.5 after:bg-sand" : "text-gold after:absolute after:inset-x-0 after:-bottom-[17px] after:h-0.5 after:bg-gold"))}>
               {t(`nav.${n.key}`)}{n.badge ? <i className="ms-1 inline-grid h-4 min-w-4 place-items-center rounded-full bg-gold px-1 text-[8px] font-bold not-italic text-white">{n.badge}</i> : null}
             </NavLink>
           ))}
         </nav>
         <div className="flex items-center gap-4 max-md:gap-3">
-          <Link to="/search" className="text-charcoal max-md:hidden" aria-label={t("nav.search")}><Search className="size-[17px]" /></Link>
-          <button type="button" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold text-charcoal transition-colors duration-150 hover:bg-soft/70 hover:text-navy max-lg:hidden" aria-label="Switch language"><Globe2 className="size-[17px]" /> {t("nav.language")}</button>
-          <CurrencyMenu className="max-md:hidden" />
-          {!user && <Link to="/auth/sign-up?role=HOST" className="border-b border-gold py-2 text-xs font-semibold text-charcoal max-lg:hidden">{t("nav.listHotel")}</Link>}
-          {user && !isGuest && <Button size="sm" variant="outline" onClick={() => navigate(roleHome(user.role))} className="max-md:hidden"><LayoutDashboard /> {t(user.role === "HOST" ? "nav.hostDashboard" : "nav.adminConsole")}</Button>}
+          <Link to="/search" className={cn("transition-colors duration-200 hover:opacity-80 max-md:hidden", ink)} aria-label={t("nav.search")}><Search className="size-[17px]" /></Link>
+          <button type="button" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className={cn("flex cursor-pointer items-center gap-1.5 py-1.5 text-xs font-semibold transition-colors duration-200 hover:opacity-80 max-lg:hidden", ink)} aria-label="Switch language"><Globe2 className="size-[17px]" /> {t("nav.language")}</button>
+          <CurrencyMenu className={cn("max-md:hidden", ink)} />
+          {!user && <Link to="/auth/sign-up?role=HOST" className={cn("border-b py-2 text-xs font-semibold transition-colors duration-200 hover:opacity-80 max-lg:hidden", ink, overlay ? "border-sand" : "border-gold")}>{t("nav.listHotel")}</Link>}
+          {user && !isGuest && <Button size="sm" variant="outline" onClick={() => navigate(roleHome(user.role))} className={cn("max-md:hidden", overlay && "border-white/50 text-white hover:text-white/75")}><LayoutDashboard /> {t(user.role === "HOST" ? "nav.hostDashboard" : "nav.adminConsole")}</Button>}
           {user && (
-            <Link to={user.role === "GUEST" ? "/notifications" : `${roleHome(user.role)}/notifications`} className="relative text-charcoal" aria-label={`${t("nav.notifications")} (${unread})`}>
+            <Link to={user.role === "GUEST" ? "/notifications" : `${roleHome(user.role)}/notifications`} className={cn("relative transition-colors duration-200 hover:opacity-80", ink)} aria-label={`${t("nav.notifications")} (${unread})`}>
               <Bell className="size-[18px]" />
               {unread > 0 && <i className="absolute -end-1.5 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-gold text-[8px] font-bold not-italic text-white">{unread}</i>}
             </Link>
           )}
           {!user && <Button size="sm" onClick={() => navigate(`/auth/sign-in?next=${encodeURIComponent(loc.pathname + loc.search)}`)} className="max-md:hidden"><LogIn /> {t("nav.signIn")}</Button>}
           <DropdownMenu>
-            <DropdownMenuTrigger aria-label={t("nav.account")} className={cn("grid size-[38px] cursor-pointer place-items-center rounded-full text-xs font-bold transition-colors duration-200 max-md:size-[34px]", user ? "bg-navy text-white hover:bg-navy/85" : "text-navy hover:bg-soft data-[state=open]:bg-soft")}>
+            <DropdownMenuTrigger aria-label={t("nav.account")} className={cn("grid size-[38px] cursor-pointer place-items-center rounded-full text-xs font-bold transition-colors duration-200 max-md:size-[34px]", user ? "bg-navy text-white hover:opacity-80" : cn("hover:opacity-80", overlay ? "text-white" : "text-navy"))}>
               {user ? initials(user.name) : <User className="size-[18px]" />}
             </DropdownMenuTrigger>
             <DropdownMenuContent>

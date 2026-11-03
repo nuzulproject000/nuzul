@@ -38,7 +38,7 @@ export function MatchPill({ score, hotelId, dark = false, className }: { score: 
       <b className="tracking-tight">{t("match.match", { score })}</b>
       {hotelId && (
         <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openWhy(hotelId); }} aria-label={`${t("match.whyThis")} (${score}%)`}
-          className={cn("rounded-full border px-2 py-[3px] text-[9px] font-bold", dark ? "border-sand/40 text-sand hover:bg-sand hover:text-navy" : "border-gold/35 bg-paper text-navy hover:bg-navy hover:text-white")}>
+          className={cn("rounded-full border px-2 py-[3px] text-[9px] font-bold", dark ? "cursor-pointer border-sand/40 text-sand hover:opacity-80" : "cursor-pointer border-gold/35 bg-paper text-navy hover:opacity-80")}>
           {t("match.why")}
         </button>
       )}

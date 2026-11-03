@@ -16,7 +16,7 @@ function SheetContent({ className, children, title, footer, side = "end", ...pro
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <DialogPrimitive.Title className="text-xl font-bold text-navy">{title}</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
-          <DialogPrimitive.Close className="rounded-full p-1 hover:bg-soft" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
+          <DialogPrimitive.Close className="rounded-full p-1 hover:opacity-80" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
         </div>
         <div className="flex-1 overflow-y-auto px-6">{children}</div>
         {footer && <div className="flex items-center justify-between border-t border-line px-6 py-4">{footer}</div>}

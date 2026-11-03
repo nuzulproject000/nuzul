@@ -66,7 +66,7 @@ export default function ResultsPage() {
       <div className="bg-soft px-12 pt-8 pb-5 max-md:px-3 max-md:py-3.5"><SearchBar compact /></div>
       <nav aria-label={t("home.categories.title")} className="scrollbar-none flex gap-7 overflow-x-auto border-b border-line px-12 pt-3.5 max-md:gap-5 max-md:px-4">
         {categories?.filter((c) => c.active).map((c) => { const Icon = categoryIcon(c.name); const on = filters.category === c.name; return (
-          <button key={c.id} type="button" aria-pressed={on} onClick={() => setFilters({ ...filters, category: on ? undefined : c.name })} className={cn("flex shrink-0 flex-col items-center gap-1.5 border-b-2 pb-3 text-[11px]", on ? "border-navy text-navy" : "border-transparent text-ink-muted hover:border-line hover:text-navy")}>
+          <button key={c.id} type="button" aria-pressed={on} onClick={() => setFilters({ ...filters, category: on ? undefined : c.name })} className={cn("flex shrink-0 flex-col items-center gap-1.5 border-b-2 pb-3 text-[11px]", on ? "border-navy text-navy" : "border-transparent text-ink-muted hover:opacity-80 hover:text-navy")}>
             <Icon className="size-[18px]" /><span>{c.name}</span>
           </button>
         ); })}
@@ -195,7 +195,7 @@ function CompareTray() {
   const { data } = useCompareHotels(ids);
   if (!ids.length) return null;
   return (
-    <div role="region" aria-label={t("results.compareBar", { count: ids.length })} className="fixed start-1/2 bottom-6 z-40 flex w-[min(760px,calc(100%-32px))] -translate-x-1/2 items-center justify-between gap-5 bg-navy py-3.5 ps-6 pe-4.5 text-white shadow-lift rtl:translate-x-1/2 max-md:bottom-[78px] max-md:flex-wrap max-md:gap-2.5 max-md:px-3.5">
+    <div role="region" aria-label={t("results.compareBar", { count: ids.length })} className="fixed start-1/2 bottom-6 z-40 flex w-[min(760px,calc(100%-32px))] -translate-x-1/2 items-center justify-between gap-5 bg-navy py-3.5 ps-6 pe-4.5 text-white shadow-lift rtl:translate-x-1/2 max-md:bottom-[calc(68px+env(safe-area-inset-bottom))] max-md:flex-wrap max-md:gap-2.5 max-md:px-3.5">
       <span className="flex flex-col"><b className="text-[13px]">{t("results.compareBar", { count: ids.length })}</b><small className="mt-0.5 text-[11px] text-[#9da5af]">{t("results.compareSub")}</small></span>
       <div className="flex max-md:hidden">{data?.map((h, i) => <img key={h.id} src={h.images[0]} alt={h.name} className={cn("size-10 rounded-full border-2 border-navy object-cover", i && "-ms-2")} />)}</div>
       <div className="flex items-center gap-2"><Button variant="light" size="sm" onClick={clear}>{t("common.clear")}</Button><Button variant="gold" disabled={ids.length < 2} asChild={ids.length >= 2}>{ids.length >= 2 ? <Link to="/compare">{t("results.compareCta")}</Link> : <span>{t("results.compareCta")}</span>}</Button></div>

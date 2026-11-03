@@ -57,8 +57,8 @@ export default function ProfilePage() {
       </div>
       <div className="grid grid-cols-[250px_1fr] gap-12 max-md:grid-cols-1 max-md:gap-6">
         <nav aria-label={t("nav.profile")} className="flex flex-col gap-1 self-start max-md:hidden">
-          {SECTIONS.map(([k, I]) => <button key={k} type="button" aria-current={section === k ? "page" : undefined} onClick={() => go(k)} className={cn("flex items-center gap-3 rounded-md px-3.5 py-3 text-start text-[13px]", section === k ? "bg-navy text-white" : "text-navy hover:bg-soft")}><I className="size-4" /> {t(`profile.nav.${k}`)}</button>)}
-          <Link to="/wishlists" className="flex items-center gap-3 rounded-md px-3.5 py-3 text-[13px] text-navy hover:bg-soft"><Heart className="size-4" /> {t("nav.wishlists")} ({wishlists?.length ?? 0})</Link>
+          {SECTIONS.map(([k, I]) => <button key={k} type="button" aria-current={section === k ? "page" : undefined} onClick={() => go(k)} className={cn("flex items-center gap-3 rounded-md px-3.5 py-3 text-start text-[13px]", section === k ? "bg-navy text-white" : "text-navy hover:opacity-80")}><I className="size-4" /> {t(`profile.nav.${k}`)}</button>)}
+          <Link to="/wishlists" className="flex items-center gap-3 rounded-md px-3.5 py-3 text-[13px] text-navy hover:opacity-80"><Heart className="size-4" /> {t("nav.wishlists")} ({wishlists?.length ?? 0})</Link>
         </nav>
         <div className="md:hidden"><Select ariaLabel={t("nav.profile")} value={section} onValueChange={(v) => go(v as Section)} options={SECTIONS.map(([k]) => ({ value: k, label: t(`profile.nav.${k}`) }))} /></div>
         <div className="min-w-0">
@@ -166,7 +166,7 @@ function PastTrip({ id, hotelId, checkIn, checkOut }: { id: string; hotelId: str
   const { data: h } = useHotel(hotelId);
   const { range } = useDates();
   return (
-    <Link to={`/trips/${id}`} className="flex items-center gap-4 border border-line bg-paper p-3 hover:border-gold">
+    <Link to={`/trips/${id}`} className="flex items-center gap-4 border border-line bg-paper p-3 hover:opacity-80">
       {h ? <img src={h.images[0]} alt="" className="h-14 w-20 object-cover" /> : <div className="skeleton h-14 w-20" />}
       <span className="flex flex-1 flex-col"><b className="text-[13px] text-navy">{h?.name}</b><small className="text-[11px] text-ink-muted">{range(checkIn, checkOut)} · {id}</small></span>
       <BookingStateBadge state="COMPLETED" />

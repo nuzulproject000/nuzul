@@ -85,7 +85,7 @@ export function BookingCard({ hotel: h, onChooseRoom }: { hotel: HotelWithMatch;
         <p className="mt-1 text-[11px] text-ink-muted">{t(`policy.short.${room.cancellationPolicy}`)}</p>
       </aside>
 
-      <div className="fixed inset-x-0 bottom-[64px] z-40 flex items-center justify-between gap-3 border-t border-line bg-paper px-4 py-3 md:hidden">
+      <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 flex items-center justify-between gap-3 border-t border-line bg-paper px-4 py-3 md:hidden">
         <span className="flex flex-col"><b className="text-navy">{money(room.nightlyPrice, h.currency)} <small className="font-normal text-ink-muted">{t("common.perNight")}</small></b><small className="text-[11px] text-ink-muted">{range(s.checkIn, s.checkOut)} · {t("common.night", { count: nights })}</small></span>
         <Button disabled={soldOut} onClick={book}>{soldOut ? t("hotel.soldOut") : t("hotel.chooseARoom")}</Button>
       </div>

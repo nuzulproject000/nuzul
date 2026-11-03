@@ -17,7 +17,7 @@ export function CurrencyMenu({ className }: { className?: string }) {
     <DropdownPrimitive.Root modal={false}>
       <DropdownPrimitive.Trigger
         aria-label={`${t("nav.currency")}: ${t(current.nameKey)}`}
-        className={cn("group flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold text-charcoal transition-colors duration-150 hover:bg-soft/70 hover:text-navy data-[state=open]:bg-soft/70", className)}
+        className={cn("group flex cursor-pointer items-center gap-1.5 py-1.5 text-xs font-semibold text-charcoal transition-colors duration-200 hover:opacity-80", className)}
       >
         <current.Flag /> {current.code}
         <ChevronDown className="size-3.5 transition-transform duration-150 group-data-[state=open]:rotate-180" />
@@ -27,7 +27,7 @@ export function CurrencyMenu({ className }: { className?: string }) {
           <DropdownPrimitive.Label className="px-3 pt-1.5 pb-2 text-[10px] font-bold tracking-widest text-gold uppercase">{t("nav.currency")}</DropdownPrimitive.Label>
           <DropdownPrimitive.RadioGroup value={currency} onValueChange={(v) => setCurrency(v as DisplayCurrency)}>
             {CURRENCIES.map(({ code, Flag, nameKey }) => (
-              <DropdownPrimitive.RadioItem key={code} value={code} className="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] text-navy outline-none transition-colors duration-150 data-[highlighted]:bg-soft data-[state=checked]:font-semibold">
+              <DropdownPrimitive.RadioItem key={code} value={code} className="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] text-navy outline-none transition-colors duration-150 data-[highlighted]:text-gold focus-visible:bg-soft data-[state=checked]:font-semibold">
                 <Flag />
                 <span className="flex-1"><b className="font-semibold">{code}</b> <span className="text-ink-muted">· {t(nameKey)}</span></span>
                 <DropdownPrimitive.ItemIndicator><Check className="size-4 text-gold" /></DropdownPrimitive.ItemIndicator>

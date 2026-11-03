@@ -25,7 +25,7 @@ function DropdownMenuContent({ className, align = "end", ...props }: React.Compo
   );
 }
 const DropdownMenuItem = React.forwardRef<React.ComponentRef<typeof DropdownPrimitive.Item>, React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Item> & { destructive?: boolean }>(({ className, destructive, ...props }, ref) => (
-  <DropdownPrimitive.Item ref={ref} className={cn("flex cursor-pointer select-none items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] text-navy outline-none data-[highlighted]:bg-soft [&_svg]:size-4", destructive && "text-error", className)} {...props} />
+  <DropdownPrimitive.Item ref={ref} className={cn("flex cursor-pointer select-none items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] text-navy outline-none data-[highlighted]:text-gold focus-visible:bg-soft [&_svg]:size-4", destructive && "text-error", className)} {...props} />
 ));
 DropdownMenuItem.displayName = "DropdownMenuItem";
 const DropdownMenuSeparator = () => <DropdownPrimitive.Separator className="my-1 h-px bg-line" />;

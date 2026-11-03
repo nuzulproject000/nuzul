@@ -25,7 +25,7 @@ function DialogContent({ className, children, size = "md", title, description, .
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <DialogPrimitive.Title className="text-2xl font-bold tracking-tight text-navy">{title}</DialogPrimitive.Title>
-          <DialogPrimitive.Close className="rounded-full p-1 text-navy hover:bg-soft" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
+          <DialogPrimitive.Close className="rounded-full p-1 text-navy hover:opacity-80" aria-label={t("common.close")}><X className="size-5" /></DialogPrimitive.Close>
         </div>
         {description ? <DialogPrimitive.Description className="mb-4 text-[13px] text-ink-muted">{description}</DialogPrimitive.Description> : <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>}
         {children}

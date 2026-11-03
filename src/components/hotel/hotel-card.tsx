@@ -46,25 +46,25 @@ export function HotelCard({ hotel, nights = 3, showCompare = false, highlighted 
   };
 
   return (
-    <article className={cn("group relative min-w-0", className)} onMouseEnter={() => onHover?.(hotel.id)} onMouseLeave={() => onHover?.(null)} aria-label={hotel.name}>
+    <article className={cn("group relative flex min-w-0 flex-col", className)} onMouseEnter={() => onHover?.(hotel.id)} onMouseLeave={() => onHover?.(null)} aria-label={hotel.name}>
       <div className={cn("relative aspect-[4/3] overflow-hidden", highlighted && "ring-3 ring-gold")}>
         <Link to={href} tabIndex={-1} aria-hidden className="block h-full overflow-hidden" ref={emblaRef}>
           <div className="flex h-full">
             {hotel.images.map((src, i) => (
-              <img key={i} src={src} alt="" loading="lazy" className="h-full min-w-0 flex-[0_0_100%] object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+              <img key={i} src={src} alt="" loading="lazy" className="h-full min-w-0 flex-[0_0_100%] object-cover" />
             ))}
           </div>
         </Link>
-        <div className="absolute start-3 top-3 z-10">{hotel.guestFavorite && <GuestFavoriteBadge small />}</div>
-        <div className="absolute end-3 top-3 z-10 flex gap-1.5">
-          <button type="button" onClick={(e) => { e.preventDefault(); void share(hotel.name, href); }} aria-label={`${t("common.share")} ${hotel.name}`} className="grid size-9 place-items-center rounded-full bg-paper/95 text-navy"><Share2 className="size-4" /></button>
-          <button type="button" onClick={toggleLike} aria-pressed={saved} aria-label={saved ? t("card.removeFrom") : t("card.saveTo")} className={cn("grid size-9 place-items-center rounded-full bg-paper/95", saved ? "text-gold" : "text-navy")}><Heart className={cn("size-[17px]", saved && "fill-current")} /></button>
+        <div className="absolute start-3 top-3 z-10">{hotel.guestFavorite && <GuestFavoriteBadge small onImage />}</div>
+        <div className="absolute end-2 top-2 z-10 flex">
+          <button type="button" onClick={(e) => { e.preventDefault(); void share(hotel.name, href); }} aria-label={`${t("common.share")} ${hotel.name}`} className="grid size-9 place-items-center text-white transition-opacity duration-150 hover:opacity-80"><Share2 className="size-[18px] [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]" /></button>
+          <button type="button" onClick={toggleLike} aria-pressed={saved} aria-label={saved ? t("card.removeFrom") : t("card.saveTo")} className="grid size-9 place-items-center text-white transition-opacity duration-150 hover:opacity-80"><Heart className={cn("size-5 [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]", saved && "fill-current")} /></button>
         </div>
-        <button type="button" onClick={go(-1)} aria-label={t("card.prevPhoto")} className="absolute start-2.5 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-paper/90 text-navy opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"><ChevronLeft className="size-4 rtl:rotate-180" /></button>
-        <button type="button" onClick={go(1)} aria-label={t("card.nextPhoto")} className="absolute end-2.5 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-paper/90 text-navy opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"><ChevronRight className="size-4 rtl:rotate-180" /></button>
+        <button type="button" onClick={go(-1)} aria-label={t("card.prevPhoto")} className="absolute start-1 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"><ChevronLeft className="size-6 [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))] rtl:rotate-180" /></button>
+        <button type="button" onClick={go(1)} aria-label={t("card.nextPhoto")} className="absolute end-1 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"><ChevronRight className="size-6 [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))] rtl:rotate-180" /></button>
         <div className="absolute inset-x-0 bottom-2.5 z-10 flex justify-center gap-1" aria-hidden>{hotel.images.map((_, i) => <i key={i} className={cn("size-1.5 rounded-full", i === index ? "bg-white" : "bg-white/55")} />)}</div>
       </div>
-      <div className="pt-4">
+      <div className="flex flex-1 flex-col pt-4">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-[10px] font-bold tracking-[0.08em] text-gold uppercase">{hotel.category}</span>
           <Rating rating={hotel.rating} reviews={hotel.reviewCount} compact />
@@ -72,7 +72,9 @@ export function HotelCard({ hotel, nights = 3, showCompare = false, highlighted 
         <h3 className="mt-3 mb-1.5 text-lg"><Link to={href} className="hover:underline underline-offset-4">{hotel.name}</Link></h3>
         <p className="mb-3 flex items-center gap-1.5 text-[11px] text-ink-muted"><MapPin className="size-3.5" /> {hotel.area}, {hotel.city}</p>
         <div className="flex flex-wrap gap-1.5">{hotel.tags.map((tag) => <span key={tag} className="bg-soft px-2 py-1.5 text-[10px] text-[#6e5a3c]">{tag}</span>)}</div>
-        <div className="mt-4 flex items-end justify-between gap-2.5 border-t border-line pt-4">
+        {/* Price / match block pinned to the bottom so cards in a row line up */}
+        <div className="mt-auto pt-4" />
+        <div className="flex items-end justify-between gap-2.5 border-t border-line pt-4">
           <MatchPill score={hotel.match.score} hotelId={hotel.id} />
           <div className="text-end">
             {monthly ? (

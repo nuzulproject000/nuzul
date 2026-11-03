@@ -67,7 +67,7 @@ export default function ComparePage() {
             <div role="columnheader" />
             {hotels.map((h) => (
               <div role="columnheader" key={h.id} className="relative flex flex-col gap-2 border-s border-line p-4">
-                <button type="button" onClick={() => toggle(h.id)} aria-label={`${t("common.remove")} ${h.name}`} className="absolute end-6 top-6 z-[1] grid size-7 place-items-center rounded-full bg-paper/90 text-navy"><X className="size-4" /></button>
+                <button type="button" onClick={() => toggle(h.id)} aria-label={`${t("common.remove")} ${h.name}`} className="absolute end-6 top-6 z-[1] grid size-8 place-items-center text-white transition-opacity duration-150 hover:opacity-80"><X className="size-5 [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]" /></button>
                 <img src={h.images[0]} alt="" className="aspect-[4/3] w-full object-cover" />
                 <h3 className="m-0 text-[15px]">{h.name}</h3>
                 <p className="m-0 text-[11px] text-ink-muted">{h.city}, {h.country}</p>
@@ -86,7 +86,7 @@ export default function ComparePage() {
         <div className="mt-8 flex flex-col gap-4 md:hidden">
           {hotels.map((h) => (
             <article key={h.id} className="border border-line bg-paper">
-              <div className="relative"><img src={h.images[0]} alt="" className="h-44 w-full object-cover" /><button type="button" onClick={() => toggle(h.id)} aria-label={`${t("common.remove")} ${h.name}`} className="absolute end-3 top-3 grid size-8 place-items-center rounded-full bg-paper/90"><X className="size-4" /></button></div>
+              <div className="relative"><img src={h.images[0]} alt="" className="h-44 w-full object-cover" /><button type="button" onClick={() => toggle(h.id)} aria-label={`${t("common.remove")} ${h.name}`} className="absolute end-3 top-3 grid size-8 place-items-center text-white transition-opacity duration-150 hover:opacity-80"><X className="size-5 [filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]" /></button></div>
               <dl className="m-0 p-4">
                 <h3 className="mb-2 text-lg"><Link to={hotelPath(h)}>{h.name}</Link></h3>
                 {rows.map((r) => { const best = bestIdx(r) === hotels.indexOf(h); return <div key={r.key} className={cn("flex items-start justify-between gap-4 border-b border-line py-2 text-[12px] last:border-0", best && "font-bold")}><dt className="text-ink-muted">{r.label}</dt><dd className="m-0 text-end text-navy">{r.cell(h)}</dd></div>; })}

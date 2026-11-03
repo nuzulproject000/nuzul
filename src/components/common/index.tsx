@@ -99,8 +99,10 @@ export function Rating({ rating, reviews, compact = false, className }: { rating
   );
 }
 
-export function GuestFavoriteBadge({ small = false }: { small?: boolean }) {
+/** `onImage`: no pill — white icon and text with a shadow, for use over photos (hotel cards). */
+export function GuestFavoriteBadge({ small = false, onImage = false }: { small?: boolean; onImage?: boolean }) {
   const { t } = useTranslation();
+  if (onImage) return <span className={cn("inline-flex items-center gap-1 whitespace-nowrap font-bold text-white [text-shadow:0_1px_2px_rgb(0_0_0/.8),0_0_8px_rgb(0_0_0/.45)]", small ? "text-[10px]" : "text-[11px]")}><Award className={cn("[filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]", small ? "size-3.5" : "size-4")} /> {t("card.guestFavorite")}</span>;
   return <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-paper font-bold text-navy", small ? "px-2 py-1 text-[9px] shadow-[0_2px_8px_rgb(15_28_46/.15)]" : "px-2.5 py-1.5 text-[10px]")}><Award className={cn("text-gold", small ? "size-3" : "size-3.5")} /> {t("card.guestFavorite")}</span>;
 }
 
@@ -145,7 +147,7 @@ export function Pagination({ page, totalPages, onChange }: { page: number; total
 /** Chip used for quick filters / preferences. */
 export function Chip({ active, onClick, children, className, ...rest }: { active?: boolean; onClick?: () => void; children: React.ReactNode; className?: string } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick">) {
   return (
-    <button type="button" aria-pressed={active} onClick={onClick} className={cn("inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-line px-3 py-2 text-[11px] text-navy transition-colors", active ? "bg-navy text-white" : "bg-transparent hover:bg-soft/60", className)} {...rest}>
+    <button type="button" aria-pressed={active} onClick={onClick} className={cn("inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-line px-3 py-2 text-[11px] text-navy transition-colors", active ? "bg-navy text-white" : "bg-transparent hover:opacity-80", className)} {...rest}>
       {children}
     </button>
   );

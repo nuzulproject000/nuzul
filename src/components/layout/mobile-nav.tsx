@@ -7,7 +7,7 @@ import { roleHome, useSession } from "@/stores/session.store";
 import { SettingsSheet } from "@/components/preferences/settings-sheet";
 import { cn } from "@/lib/utils";
 
-const item = "relative flex min-h-12 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-1 text-[10px] transition-colors duration-150";
+const item = "relative flex min-h-11 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-[10px] leading-tight transition-colors duration-150";
 
 /** Mobile bottom navigation (§57) — items depend on who is signed in; Settings opens language & currency. */
 export function MobileNav() {
@@ -24,14 +24,14 @@ export function MobileNav() {
       : [{ to: "/", key: "explore", icon: Compass, end: true }, { to: "/search", key: "search", icon: Search }, { to: roleHome(user.role), key: user.role === "HOST" ? "hostDashboard" : "adminConsole", icon: LayoutDashboard }];
   return (
     <>
-      <nav aria-label="Mobile" className="fixed inset-x-0 bottom-0 z-50 hidden h-[calc(66px+env(safe-area-inset-bottom))] items-start justify-around border-t border-line bg-paper px-1 pt-[9px] pb-[env(safe-area-inset-bottom)] max-md:flex">
+      <nav aria-label="Mobile" className="fixed inset-x-0 bottom-0 z-50 hidden h-[calc(56px+env(safe-area-inset-bottom))] items-start justify-around border-t border-line bg-paper px-1 pt-1.5 pb-[env(safe-area-inset-bottom)] max-md:flex">
         {items.map(({ to, key, icon: Icon, ...rest }) => (
-          <NavLink key={key} to={to} end={"end" in rest} className={({ isActive }) => cn(item, isActive ? "text-gold" : "text-ink-muted hover:text-navy")}>
+          <NavLink key={key} to={to} end={"end" in rest} className={({ isActive }) => cn(item, isActive ? "text-gold" : "text-ink-muted hover:opacity-80")}>
             <Icon className="size-5" /> <span className="max-w-full truncate px-0.5">{t(`nav.${key}`)}</span>
-            {"badge" in rest && rest.badge ? <i className="absolute end-[calc(50%-20px)] top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-1 text-[8px] font-bold not-italic text-white">{rest.badge}</i> : null}
+            {"badge" in rest && rest.badge ? <i className="absolute end-[calc(50%-20px)] -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-1 text-[8px] font-bold not-italic text-white">{rest.badge}</i> : null}
           </NavLink>
         ))}
-        <button type="button" onClick={() => setSettings(true)} aria-haspopup="dialog" aria-expanded={settings} className={cn(item, settings ? "text-gold" : "text-ink-muted hover:text-navy")}>
+        <button type="button" onClick={() => setSettings(true)} aria-haspopup="dialog" aria-expanded={settings} className={cn(item, settings ? "text-gold" : "text-ink-muted hover:opacity-80")}>
           <Settings className="size-5" /> <span className="max-w-full truncate px-0.5">{t("nav.settings")}</span>
         </button>
       </nav>

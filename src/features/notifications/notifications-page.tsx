@@ -40,7 +40,7 @@ export default function NotificationsPage() {
             : <ul className="flex flex-col border border-line bg-paper">
               {list.map((n) => (
                 <li key={n.id} className="border-b border-line last:border-0">
-                  <button type="button" onClick={() => { if (!n.read) mark.mutate(n.id); if (n.link) navigate(n.link); }} className={cn("grid w-full grid-cols-[10px_1fr_auto] items-start gap-4 px-5 py-4 text-start hover:bg-soft/50", !n.read && "bg-[#fbf6ec]")}>
+                  <button type="button" onClick={() => { if (!n.read) mark.mutate(n.id); if (n.link) navigate(n.link); }} className={cn("grid w-full grid-cols-[10px_1fr_auto] items-start gap-4 px-5 py-4 text-start hover:opacity-80", !n.read && "bg-[#fbf6ec]")}>
                     <span className={cn("mt-1.5 size-2 rounded-full", n.read ? "bg-transparent" : "bg-gold")} aria-label={n.read ? undefined : "unread"} />
                     <span className="flex flex-col gap-0.5"><small className="text-[9px] font-bold tracking-[0.12em] text-gold uppercase">{t(`notifications.type.${n.type}`)}</small><b className="text-[13px] text-navy">{n.title}</b><span className="text-[12px] text-ink-muted">{n.body}</span></span>
                     <span className="flex flex-col items-end gap-1 text-[10px] text-ink-muted"><time>{date(n.createdAt, "d MMM")}</time><em className="not-italic">{n.channels.map((c) => t(`notifications.channel.${c}`)).join(" · ")}</em></span>

@@ -110,6 +110,10 @@
   h3 { letter-spacing: -0.025em; font-weight: 700; }
   p { line-height: 1.7; }
   :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+  /* Interactive elements always show the pointer (Tailwind v4 preflight resets buttons to the default cursor). */
+  a[href], button:not(:disabled), summary, select, label[for], input[type="checkbox"], input[type="radio"],
+  [role="button"], [role="tab"], [role="option"], [role="radio"], [role="checkbox"], [role="switch"], [role="menuitem"], [role="menuitemradio"] { cursor: pointer; }
+  button:disabled, [aria-disabled="true"] { cursor: default; }
   img { display: block; max-width: 100%; }
 }
 
@@ -119,17 +123,14 @@
   .container-page { width: min(1400px, calc(100% - 96px)); margin-inline: auto; }
   @media (max-width: 1050px) { .container-page { width: calc(100% - 48px); } }
   @media (max-width: 760px) { .container-page { width: calc(100% - 32px); } }
-  /* Wider fluid container for full-bleed-feeling sections on large screens (home questionnaire). */
-  .container-wide { width: min(1760px, calc(100% - clamp(48px, 6vw, 160px))); margin-inline: auto; }
-  @media (max-width: 1050px) { .container-wide { width: calc(100% - 48px); } }
-  @media (max-width: 767px) { .container-wide { width: 100%; } }
 
   /* Home hero (root route): full first screen, text over the image. */
-  .home-hero { height: calc(100svh - var(--header-h)); min-height: 520px; }
+  /* The hero runs under the transparent header (pulled up by the header height): image = full 100svh. */
+  .home-hero { height: 100svh; min-height: 560px; margin-top: calc(-1 * var(--header-h)); }
   .home-hero-title { font-size: clamp(2.75rem, 1.2rem + 4.2vw, 6.25rem); }
   .home-hero-lead { font-size: clamp(0.9375rem, 0.72rem + 0.45vw, 1.25rem); }
   @media (max-width: 767px) {
-    .home-hero { min-height: 480px; }
+    .home-hero { min-height: 540px; }
     .home-hero-title { font-size: clamp(2rem, 8.4vw, 2.6rem); }
     .home-hero-lead { font-size: 0.8125rem; }
   }
@@ -147,7 +148,7 @@
 /* Leaflet: keep the map under sticky headers and brand the price markers */
 .leaflet-container { font-family: inherit; z-index: 0; background: #d9dfda; }
 .nuzul-marker { background: var(--paper); color: var(--navy); border-radius: 999px; box-shadow: 0 4px 12px rgb(15 28 46 / .2); font: 700 11px/1 var(--font-sans); padding: 8px 10px; white-space: nowrap; transform: translate(-50%, -50%); width: max-content; transition: transform .15s, background .15s; }
-.nuzul-marker.is-active { background: var(--navy); color: #fff; transform: translate(-50%, -50%) scale(1.1); }
+.nuzul-marker.is-active { background: var(--navy); color: #fff; }
 .nuzul-cluster { background: var(--gold); color: #fff; border-radius: 999px; width: 38px; height: 38px; display: grid; place-items: center; font: 700 12px var(--font-sans); box-shadow: 0 0 0 6px rgb(184 148 91 / .25); transform: translate(-50%, -50%); }
 
 @media (prefers-reduced-motion: reduce) {
