@@ -17,6 +17,12 @@ import { photos } from "@/lib/imagery";
 import { hotelPath } from "@/app/paths";
 import { cn } from "@/lib/utils";
 
+/** Hero entrance stagger (CSS-only; disabled by prefers-reduced-motion). */
+const rise = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
+const HERO_BTN = "min-h-12 px-6 text-[13px] min-[1800px]:min-h-14 min-[1800px]:px-8 min-[1800px]:text-[15px] max-md:min-h-10 max-md:px-4 max-md:text-[12px]";
+/** Larger hero sources for wide screens (same photo, Unsplash width parameter). */
+const heroSrcSet = [1200, 1800, 2600, 3400].map((w) => `${photos.hero.replace(/w=\d+/, `w=${w}`)} ${w}w`).join(", ");
+
 function HotelRow({ kind, columns = 4 }: { kind: CollectionKind; columns?: 3 | 4 }) {
   const { data, isLoading, error, refetch } = useCollection(kind);
   if (error) return <ErrorState error={error} onRetry={() => void refetch()} />;
@@ -48,40 +54,43 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 1–2 · Hero */}
-      <section className="grid min-h-[650px] grid-cols-[.76fr_1.24fr] max-lg:grid-cols-[1fr_1.15fr] max-md:flex max-md:min-h-0 max-md:flex-col-reverse">
-        <div className="flex flex-col items-start justify-center py-[70px] ps-[max(48px,calc((100vw-1440px)/2))] pe-12 max-lg:ps-9 max-md:px-5 max-md:pt-9 max-md:pb-20">
-          <span className="eyebrow">{t("home.eyebrow")}</span>
-          <h1 className="mb-6 max-md:text-[42px]">{t("home.title1")}<br />{t("home.title2")}</h1>
-          <p className="max-w-[440px] text-base text-ink-muted max-md:text-[13px]">{t("home.lead")}</p>
-          <div className="mt-5 mb-14 flex flex-wrap gap-3 max-md:mb-0">
-            <Button asChild><Link to="/search">{t("home.explore")} <ArrowRight className="rtl:rotate-180" /></Link></Button>
-            <Button variant="outline" onClick={() => document.getElementById("match")?.scrollIntoView({ behavior: "smooth" })}>{t("home.findMatch")}</Button>
-          </div>
-          <div className="flex items-center gap-3.5 max-md:hidden">
-            <div className="flex">{["AM", "RS", "LN"].map((x, i) => <span key={x} className={cn("grid size-[30px] place-items-center rounded-full border-2 border-ivory bg-sand text-[8px] text-navy", i && "-ms-2")}>{x}</span>)}</div>
-            <p className="m-0 text-[11px] leading-snug text-ink-muted"><b className="text-navy">{t("home.inventoryNote")}</b><br />{t("home.inventorySub", { count: 13 })}</p>
+      {/* 1–2 · Hero — full first screen (header + hero = one viewport), text over the image */}
+      <section aria-labelledby="hero-title" className="home-hero relative isolate flex overflow-hidden bg-navy">
+        <img src={photos.hero} srcSet={heroSrcSet} sizes="100vw" alt="Mediterranean resort beside clear blue water" fetchPriority="high"
+          className="hero-settle absolute inset-0 -z-20 h-full w-full object-cover" />
+        {/* Readability overlay: darker on the text side (flips in RTL), plus a floor for the bottom row */}
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-navy/85 via-navy/45 to-navy/5 rtl:bg-gradient-to-l max-md:bg-gradient-to-t max-md:from-navy/90 max-md:via-navy/50 max-md:to-navy/10 rtl:max-md:bg-gradient-to-t" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-gradient-to-t from-navy/45 to-transparent max-md:hidden" />
+
+        <div className="container-page flex flex-col justify-center py-12 text-white max-md:justify-end max-md:pt-16 max-md:pb-[calc(66px+env(safe-area-inset-bottom)+28px)]">
+          <div className="max-w-[min(760px,62%)] max-lg:max-w-[600px] max-md:max-w-none">
+            <span className="eyebrow hero-rise text-sand max-md:mb-2.5 max-md:text-[10px]">{t("home.eyebrow")}</span>
+            <h1 id="hero-title" className="home-hero-title hero-rise mb-[clamp(16px,1.6vw,32px)] text-white [text-wrap:balance]" style={rise(80)}>{t("home.title1")}<br />{t("home.title2")}</h1>
+            <p className="home-hero-lead hero-rise max-w-[36ch] text-white/85" style={rise(160)}>{t("home.lead")}</p>
+            <div className="hero-rise mt-[clamp(20px,2vw,36px)] flex flex-wrap gap-3 max-md:gap-2.5" style={rise(240)}>
+              <Button asChild variant="gold" className={HERO_BTN}><Link to="/search">{t("home.explore")} <ArrowRight className="rtl:rotate-180" /></Link></Button>
+              <Button variant="outline" className={cn(HERO_BTN, "border-white/45 bg-white/10 text-white backdrop-blur-md hover:bg-white/20")} onClick={() => document.getElementById("match")?.scrollIntoView({ behavior: "smooth" })}>{t("home.findMatch")}</Button>
+            </div>
+            <div className="hero-rise mt-[clamp(28px,3.4vw,64px)] flex items-center gap-3.5 max-md:mt-6" style={rise(320)}>
+              <div className="flex">{["AM", "RS", "LN"].map((x, i) => <span key={x} className={cn("grid size-[30px] place-items-center rounded-full border-2 border-white/80 bg-sand text-[8px] text-navy max-md:size-[26px]", i && "-ms-2")}>{x}</span>)}</div>
+              <p className="m-0 text-[11px] leading-snug text-white/75 min-[1800px]:text-[13px]"><b className="text-white">{t("home.inventoryNote")}</b><br />{t("home.inventorySub", { count: 13 })}</p>
+            </div>
           </div>
         </div>
-        <div className="relative my-6 me-6 min-h-[590px] overflow-hidden max-md:m-0 max-md:h-[340px] max-md:min-h-0">
-          <img src={photos.hero} alt="Mediterranean resort beside clear blue water" className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-navy/50" />
-          <small className="absolute start-6 bottom-6 z-10 text-white max-md:hidden">{t("home.heroCaption")}</small>
-          <div className="absolute end-6 bottom-6 z-10 flex flex-col items-start gap-2 bg-navy/95 px-5 py-4 text-white max-md:end-4 max-md:bottom-4">
-            <MatchPill score={96} dark /><span className="text-[11px]">{t("home.heroFit")}</span>
-          </div>
-        </div>
+        <small className="absolute end-[max(24px,calc((100%-1400px)/2))] bottom-6 text-[11px] text-white/80 [text-shadow:0_1px_3px_rgb(0_0_0/.4)] max-md:end-4 max-md:top-4 max-md:bottom-auto max-md:text-[10px]">{t("home.heroCaption")}</small>
       </section>
 
-      {/* 3 · Search — 4 · Questionnaire attached directly beneath */}
-      <SearchBar />
-      <div id="match" className="container-page">
-        <div className="my-7 flex items-center gap-3.5 text-gold" aria-hidden>
+      {/* 3 · Search — its own section under the hero — 4 · Questionnaire attached directly beneath */}
+      <section aria-label={t("nav.search")} className="container-page pt-12 max-md:pt-5">
+        <SearchBar />
+      </section>
+      <div id="match" className="scroll-mt-[var(--header-h)]">
+        <div className="container-page my-7 flex items-center gap-3.5 text-gold max-md:my-5" aria-hidden>
           <span className="h-px flex-1 bg-gradient-to-r from-transparent to-gold/60 rtl:bg-gradient-to-l" />
           <small className="text-[10px] font-bold tracking-[0.16em] uppercase">{t("home.refine")}</small>
           <span className="h-px flex-1 bg-gradient-to-r from-gold/60 to-transparent rtl:bg-gradient-to-l" />
         </div>
-        <Questionnaire />
+        <div className="container-wide"><Questionnaire /></div>
       </div>
 
       {/* 5 · Category navigation */}
@@ -101,11 +110,11 @@ export default function HomePage() {
         <SectionHeading eyebrow={t("home.destinations.eyebrow")} title={t("home.destinations.title")} action={t("home.destinations.all")} onAction={() => navigate("/search?destination=")} />
         <div className="grid grid-cols-[1.2fr_.8fr_.8fr] grid-rows-[240px_240px] gap-4 max-md:-me-4 max-md:flex max-md:overflow-x-auto max-md:scrollbar-none">
           {destinations?.slice(0, 4).map((d, i) => (
-            <button key={d.city} type="button" onClick={() => goCity(d.city)} className={cn("group relative overflow-hidden text-start max-md:h-80 max-md:flex-[0_0_78%]", i === 0 && "row-span-2", i === 3 && "col-span-2")}>
+            <button key={d.city} type="button" onClick={() => goCity(d.city)} className={cn("group relative cursor-pointer overflow-hidden text-start focus-visible:outline-offset-[-3px] max-md:h-80 max-md:flex-[0_0_78%]", i === 0 && "row-span-2", i === 3 && "col-span-2")}>
               <img src={d.image} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               <span className="absolute inset-0 bg-gradient-to-b from-transparent from-50% to-navy/75" />
               <span className="absolute start-5 bottom-5 z-10 flex flex-col text-white"><b className="text-lg">{d.city}</b><small className="mt-1 opacity-80">{d.detail}</small></span>
-              <i className="absolute end-5 bottom-5 z-10 grid size-9 place-items-center rounded-full bg-white/90 text-navy"><ArrowRight className="size-4 rtl:rotate-180" /></i>
+              <i aria-hidden className="absolute end-5 bottom-5 z-10 text-white drop-shadow-[0_1px_4px_rgb(0_0_0/.55)] transition-transform duration-200 group-hover:translate-x-1 group-focus-visible:translate-x-1 rtl:group-hover:-translate-x-1 rtl:group-focus-visible:-translate-x-1"><ArrowRight className="size-6 rtl:rotate-180" /></i>
             </button>
           ))}
         </div>
