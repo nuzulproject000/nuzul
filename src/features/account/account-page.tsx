@@ -39,7 +39,7 @@ export default function AccountPage() {
       <PageHeader eyebrow={t("account.eyebrow")} title={t("account.title", { name: user.name.split(" ")[0] })} lead={t("account.lead")} actions={<Button variant="outline" onClick={() => navigate("/profile")}><User /> {t("nav.profile")}</Button>} />
       <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2">
         {tiles.map(({ to, icon: I, label, value, sub }) => (
-          <Link key={to} to={to} className="flex items-center gap-3 border border-line bg-paper p-4 hover:border-gold">
+          <Link key={to} to={to} className="flex items-center gap-3 border border-line bg-paper p-4 hover:opacity-80">
             <span className="grid size-10 place-items-center rounded-full bg-soft text-gold"><I className="size-5" /></span>
             <span className="flex flex-col"><b className="text-xl text-navy">{value}</b><small className="text-[11px] text-ink-muted">{label} · {sub}</small></span>
           </Link>

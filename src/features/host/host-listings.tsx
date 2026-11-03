@@ -70,7 +70,7 @@ function Editor({ hotel, onClose }: { hotel: Hotel; onClose: () => void }) {
   return (
     <section className="grid grid-cols-[220px_1fr] border border-line bg-paper max-md:grid-cols-1" aria-label={t("host.listings.edit")}>
       <nav className="flex flex-col border-e border-line p-3 max-md:flex-row max-md:overflow-x-auto max-md:border-e-0 max-md:border-b">
-        {SECTIONS.map((k) => <button key={k} type="button" aria-current={sec === k} onClick={() => setSec(k)} className={cn("flex items-center gap-2 rounded-md px-3 py-2.5 text-start text-[12px] whitespace-nowrap", sec === k ? "bg-navy text-white" : "text-navy hover:bg-soft")}><Check className="size-3.5" /> {t(`host.sec.${k}`)}</button>)}
+        {SECTIONS.map((k) => <button key={k} type="button" aria-current={sec === k} onClick={() => setSec(k)} className={cn("flex items-center gap-2 rounded-md px-3 py-2.5 text-start text-[12px] whitespace-nowrap", sec === k ? "bg-navy text-white" : "text-navy hover:opacity-80")}><Check className="size-3.5" /> {t(`host.sec.${k}`)}</button>)}
       </nav>
       <div className="p-6 max-md:p-4">
         <div className="mb-5 flex items-start justify-between gap-3"><div><span className="eyebrow">{t("host.listings.edit")}</span><h2 className="m-0 text-[22px]">{hotel.name} · {t(`host.sec.${sec}`)}</h2></div><Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("common.close")}><X /></Button></div>

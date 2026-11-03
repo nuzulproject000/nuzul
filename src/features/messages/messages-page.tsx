@@ -50,7 +50,7 @@ export function Inbox({ scope, basePath, className }: { scope: InboxScope; baseP
             : isLoading ? [0, 1, 2].map((i) => <div key={i} className="skeleton mx-5 my-3 h-14" />)
             : list.length === 0 ? <EmptyState className="m-4" icon={<MessageCircle />} title={t("messages.empty")} text={t(scope === "host" ? "messages.emptyHost" : scope === "admin" ? "messages.emptyAdmin" : "messages.emptyText")} />
             : list.map((c) => (
-              <button key={c.id} type="button" onClick={() => navigate(`${basePath}/${c.id}`)} aria-current={c.id === id} className={cn("flex w-full items-center gap-3 border-b border-line px-5 py-4 text-start", c.id === id ? "bg-soft" : "hover:bg-soft/50")}>
+              <button key={c.id} type="button" onClick={() => navigate(`${basePath}/${c.id}`)} aria-current={c.id === id} className={cn("flex w-full items-center gap-3 border-b border-line px-5 py-4 text-start", c.id === id ? "bg-soft" : "hover:opacity-80")}>
                 <Avatar c={c} scope={scope} />
                 <span className="flex min-w-0 flex-1 flex-col"><b className="truncate text-[13px] text-navy">{c.title}</b><small className={cn("truncate text-[12px]", c.unread ? "font-semibold text-charcoal" : "text-ink-muted")}>{c.lastMessage}</small></span>
                 <span className="flex flex-col items-end gap-1"><time className="text-[10px] text-ink-muted">{date(c.lastAt, "d MMM")}</time>{c.unread > 0 && <i className="grid size-[18px] place-items-center rounded-full bg-gold text-[10px] font-bold text-white not-italic" aria-label={`${c.unread} unread`}>{c.unread}</i>}</span>

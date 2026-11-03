@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Header } from "./header";
+import { Header, HERO_ROUTES } from "./header";
 import { Footer } from "./footer";
 import { MobileNav } from "./mobile-nav";
 import { WhyMatchDialog } from "@/components/match";
@@ -13,12 +13,14 @@ export function GuestLayout() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const footer = !NO_FOOTER.some((p) => pathname.startsWith(p));
+  const hero = HERO_ROUTES.includes(pathname);
   return (
-    <div className="min-h-screen overflow-x-clip max-md:pb-[calc(66px+env(safe-area-inset-bottom))]">
+    <div className="min-h-screen overflow-x-clip max-md:pb-[calc(56px+env(safe-area-inset-bottom))]">
       <a href="#main" className="fixed start-2 top-2 z-[400] -translate-y-[300%] bg-navy px-3.5 py-2.5 text-xs text-white focus:translate-y-0">{t("nav.skip")}</a>
       <DemoStrip />
+      {hero && <SuspendedBanner />}
       <Header />
-      <SuspendedBanner />
+      {!hero && <SuspendedBanner />}
       <main id="main"><Outlet /></main>
       {footer && <Footer />}
       <MobileNav />

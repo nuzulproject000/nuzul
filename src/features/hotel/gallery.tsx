@@ -38,7 +38,7 @@ export function Gallery({ images, rooms, name, initial, onClose }: { images: str
               ))}
             </div>
             <span className="text-[12px] text-white/70" aria-live="polite">{index + 1} / {list.length}</span>
-            <DialogPrimitive.Close aria-label={t("common.close")} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><X className="size-5" /></DialogPrimitive.Close>
+            <DialogPrimitive.Close aria-label={t("common.close")} className="grid size-10 place-items-center rounded-full hover:opacity-80"><X className="size-5" /></DialogPrimitive.Close>
           </header>
           <div className="relative min-h-0 flex-1">
             <div ref={ref} className="h-full overflow-hidden">
@@ -46,8 +46,8 @@ export function Gallery({ images, rooms, name, initial, onClose }: { images: str
                 {list.map((src, i) => <div key={src + i} className="flex h-full min-w-0 flex-[0_0_100%] items-center justify-center px-16 max-md:px-0"><img src={src} alt={`${name} ${i + 1}`} className="max-h-full max-w-full object-contain" /></div>)}
               </div>
             </div>
-            <button type="button" onClick={prev} aria-label={t("card.prevPhoto")} className="absolute start-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-navy max-md:hidden"><ChevronLeft className="rtl:rotate-180" /></button>
-            <button type="button" onClick={next} aria-label={t("card.nextPhoto")} className="absolute end-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-navy max-md:hidden"><ChevronRight className="rtl:rotate-180" /></button>
+            <button type="button" onClick={prev} aria-label={t("card.prevPhoto")} className="absolute start-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center text-white transition-opacity duration-150 hover:opacity-80 max-md:hidden [&_svg]:size-8 [&_svg]:[filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]"><ChevronLeft className="rtl:rotate-180" /></button>
+            <button type="button" onClick={next} aria-label={t("card.nextPhoto")} className="absolute end-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center text-white transition-opacity duration-150 hover:opacity-80 max-md:hidden [&_svg]:size-8 [&_svg]:[filter:drop-shadow(0_1px_1.5px_rgb(0_0_0/.75))_drop-shadow(0_0_6px_rgb(0_0_0/.35))]"><ChevronRight className="rtl:rotate-180" /></button>
           </div>
           <div className="scrollbar-none flex gap-2 overflow-x-auto px-6 py-4">
             {list.map((src, i) => <button key={src + i} type="button" onClick={() => api?.scrollTo(i)} aria-label={`${i + 1}`} aria-current={i === index} className={cn("h-14 w-20 shrink-0 overflow-hidden border-2", i === index ? "border-sand" : "border-transparent opacity-60")}><img src={src} alt="" className="h-full w-full object-cover" /></button>)}

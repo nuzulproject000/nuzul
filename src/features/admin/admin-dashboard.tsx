@@ -41,7 +41,7 @@ export default function AdminDashboard() {
         </Panel>
       </div>
       <Panel title={t("admin.trust")} sub={t("admin.trustSub")}>
-        <div className="grid grid-cols-4 gap-3 max-md:grid-cols-2">{fraud.map(({ icon: I, label, value, to }) => <Link key={label} to={to} className="flex items-center gap-3 border border-line p-4 hover:border-gold"><I className="size-5 text-gold" /><span className="flex flex-col"><b className="text-xl text-navy">{value}</b><small className="text-[11px] text-ink-muted">{label}</small></span></Link>)}</div>
+        <div className="grid grid-cols-4 gap-3 max-md:grid-cols-2">{fraud.map(({ icon: I, label, value, to }) => <Link key={label} to={to} className="flex items-center gap-3 border border-line p-4 hover:opacity-80"><I className="size-5 text-gold" /><span className="flex flex-col"><b className="text-xl text-navy">{value}</b><small className="text-[11px] text-ink-muted">{label}</small></span></Link>)}</div>
       </Panel>
     </>
   );

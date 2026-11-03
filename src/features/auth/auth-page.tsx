@@ -150,7 +150,7 @@ function SignIn({ go }: { go: (m: Mode, extra?: Record<string, string>) => void 
         <p className="mb-3 text-[11px] text-ink-muted">{t("auth.demoText")}</p>
         <div className="grid grid-cols-3 gap-2 max-sm:grid-cols-1">
           {(demos ?? []).map((d) => { const I = ICON[d.role]; return (
-            <button key={d.id} type="button" disabled={m.isPending} onClick={() => demo(d.email)} className="flex flex-col items-start gap-1 border border-line bg-ivory p-3 text-start text-navy hover:border-gold disabled:opacity-60" aria-label={t("auth.continueAs", { role: t(`auth.role.${d.role}`), name: d.name })}>
+            <button key={d.id} type="button" disabled={m.isPending} onClick={() => demo(d.email)} className="flex flex-col items-start gap-1 border border-line bg-ivory p-3 text-start text-navy hover:opacity-80 disabled:opacity-60" aria-label={t("auth.continueAs", { role: t(`auth.role.${d.role}`), name: d.name })}>
               <I className="size-[18px] text-gold" /><b className="text-[12px]">{t("auth.continueAsShort", { role: t(`auth.role.${d.role}`) })}</b><small className="truncate text-[10px] text-ink-muted">{d.name}</small>
             </button>
           ); })}

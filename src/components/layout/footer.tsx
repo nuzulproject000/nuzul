@@ -26,7 +26,7 @@ export function Footer() {
         <div className="flex flex-col items-start gap-3"><b className="mb-1.5 text-[11px] tracking-widest text-sand uppercase">Partners</b><Link className={linkCls} to="/auth/sign-up?role=HOST">{t("nav.listHotel")}</Link><Link className={linkCls} to="/host">{t("nav.hostDashboard")}</Link><Link className={linkCls} to="/admin">{t("nav.adminConsole")}</Link></div>
       </div>
       <div className="mt-12 flex justify-between gap-4 border-t border-white/12 pt-5 text-[10px] text-[#7e8996] max-md:flex-col">
-        <span>© 2026 Nuzul. {t("brand.sample")}</span>
+        <span>{t("brand.copyright")}</span>
         <div className="flex flex-wrap gap-5"><DemoResetButton className={linkCls} /><Link className={linkCls} to="/system">{t("nav.designSystem")}</Link><button type="button" className={linkCls} onClick={() => setLocale(locale === "en" ? "ar" : "en")}>English / العربية</button><button type="button" className={linkCls} onClick={() => setCurrency(currency === "EGP" ? "USD" : "EGP")}>{currency}</button></div>
       </div>
     </footer>

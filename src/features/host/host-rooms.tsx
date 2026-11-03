@@ -33,7 +33,7 @@ export default function HostRooms() {
       </Toolbar>
       <div className="grid grid-cols-[220px_1fr] border border-line bg-paper max-md:grid-cols-1">
         <nav className="flex flex-col border-e border-line p-3 max-md:flex-row max-md:overflow-x-auto max-md:border-e-0 max-md:border-b">
-          {hotel.rooms.map((r) => <button key={r.id} type="button" aria-current={r.id === room.id} onClick={() => setRoomId(r.id)} className={cn("flex items-center gap-2 rounded-md px-3 py-2.5 text-start text-[12px] whitespace-nowrap", r.id === room.id ? "bg-navy text-white" : "text-navy hover:bg-soft")}><Users className="size-3.5" /> {r.name}</button>)}
+          {hotel.rooms.map((r) => <button key={r.id} type="button" aria-current={r.id === room.id} onClick={() => setRoomId(r.id)} className={cn("flex items-center gap-2 rounded-md px-3 py-2.5 text-start text-[12px] whitespace-nowrap", r.id === room.id ? "bg-navy text-white" : "text-navy hover:opacity-80")}><Users className="size-3.5" /> {r.name}</button>)}
         </nav>
         <RoomForm key={room.id} room={room} />
       </div>

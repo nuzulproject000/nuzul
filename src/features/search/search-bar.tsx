@@ -64,26 +64,31 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
   const onInvalid = () => setOpen(errors.destination ? "where" : "when");
 
   const range: DateRange = { from: parseISO(s.checkIn), to: parseISO(s.checkOut) };
-  const home = !compact;
-  const fieldCls = (k: string) => home
-    ? cn("relative flex min-w-0 cursor-pointer flex-col justify-center rounded-md border-e border-line px-6 text-start transition-colors duration-150 hover:bg-ivory/80 focus-within:bg-ivory max-lg:px-4 max-md:min-h-[52px] max-md:rounded-none max-md:px-2 max-md:first:ps-2.5", open === k && "bg-ivory")
-    : cn("relative flex flex-col justify-center rounded-md border-e border-line px-6 text-start max-md:min-h-[62px] max-md:border-e-0 max-md:border-b max-md:px-3.5", open === k && "bg-ivory");
-  const labelCls = cn("text-[10px] font-bold tracking-[0.12em] text-gold uppercase", home && "max-md:truncate max-md:text-[10px] max-md:tracking-[0.08em]");
-  const valueCls = cn("mt-1.5 truncate text-[13px] font-semibold text-navy", home && "max-md:mt-1 max-md:text-[12px]");
+  /* Flat layout (no card): fields sit on the page background with thin vertical dividers.
+   * Mobile: one row of three columns, text wraps instead of truncating. Same on home and /search. */
+  const fieldCls = (k: string) => cn(
+    "relative flex min-w-0 cursor-pointer flex-col justify-center border-e border-line px-6 text-start transition-opacity duration-150 hover:opacity-80 max-lg:px-4",
+    "max-md:justify-start max-md:px-2 max-md:py-1 max-md:first:ps-0 max-md:last:pe-0",
+    open === k && "opacity-100",
+  );
+  const labelCls = "text-[10px] font-bold tracking-[0.12em] text-gold uppercase max-md:tracking-[0.06em]";
+  const valueCls = "mt-1.5 text-[13px] font-semibold text-navy md:truncate max-md:mt-1 max-md:text-[11px] max-md:leading-snug max-md:break-words";
   const errorKey = errors.destination?.message ?? errors.checkOut?.message;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)} role="search" aria-label={t("nav.search")} className={cn("relative z-30 mx-auto max-w-[1280px]", home && "w-full")} noValidate>
-      <div className={cn("grid grid-cols-[1.4fr_1.1fr_1fr_auto] bg-paper p-2.5", compact ? "min-h-[72px] shadow-[0_6px_20px_rgb(15_28_46/.08)] max-md:flex max-md:flex-col max-md:p-2" : "min-h-[76px] border border-line/70 shadow-[0_10px_30px_rgb(15_28_46/.07)] max-md:min-h-0 max-md:grid-cols-3 max-md:p-1.5")}>
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} role="search" aria-label={t("nav.search")} className="relative z-30 mx-auto w-full max-w-[1280px]" noValidate>
+      <div className={cn("grid grid-cols-[1.4fr_1.1fr_1fr_auto] items-stretch max-md:grid-cols-3 max-md:gap-y-3", compact ? "min-h-14" : "min-h-16")}>
         {/* Where */}
         <Popover open={open === "where"} onOpenChange={(o) => setOpen(o ? "where" : "")}>
           <PopoverAnchor asChild>
-            <div className={fieldCls("where")} onClick={home ? () => document.getElementById("sb-where")?.focus() : undefined}>
-              <label htmlFor="sb-where" className={cn(labelCls, home && "cursor-pointer")}>{t("search.where")}</label>
+            <div className={fieldCls("where")} onClick={() => document.getElementById("sb-where")?.focus()}>
+              <label htmlFor="sb-where" className={cn(labelCls, "cursor-pointer")}>{t("search.where")}</label>
+              {/* Mobile: show the full destination wrapped; the single-line input takes over while typing */}
+              {open !== "where" && <span aria-hidden className={cn(valueCls, "md:hidden", !query && "font-normal text-ink-muted/70")}>{query || t("search.wherePh")}</span>}
               <Controller control={control} name="destination" render={({ field }) => (
                 <input id="sb-where" {...field} value={query} autoComplete="off" placeholder={t("search.wherePh")} aria-autocomplete="list" aria-expanded={open === "where"} aria-invalid={!!errors.destination}
                   onFocus={() => setOpen("where")} onChange={(e) => { setQuery(e.target.value); field.onChange(e.target.value); setOpen("where"); }}
-                  className={cn(valueCls, "w-full bg-transparent outline-none placeholder:text-ink-muted/70", home && "cursor-pointer focus:cursor-text")} />
+                  className={cn(valueCls, "w-full cursor-pointer bg-transparent outline-none placeholder:text-ink-muted/70 focus:cursor-text", open !== "where" && "max-md:absolute max-md:size-px max-md:overflow-hidden max-md:opacity-0")} />
               )} />
             </div>
           </PopoverAnchor>
@@ -93,7 +98,7 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
               {suggestions.length === 0 && <li className="p-3 text-[13px] text-ink-muted">{t("search.noMatches")}</li>}
               {suggestions.map((sg) => { const Icon = KIND_ICON[sg.kind]; return (
                 <li key={sg.label + sg.kind}>
-                  <button type="button" role="option" aria-selected={false} className="flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-start hover:bg-soft focus-visible:bg-soft"
+                  <button type="button" role="option" aria-selected={false} className="flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-start hover:opacity-80 focus-visible:bg-soft"
                     onClick={() => {
                       if (sg.kind === "HOTEL") { setOpen(""); navigate(`/hotels/${sg.value}`); return; }
                       const v = sg.kind === "NEARBY" ? "Egypt" : sg.value;
@@ -175,16 +180,11 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
           </PopoverContent>
         </Popover>
 
-        {home ? (
-          <Button type="submit" variant="gold" aria-label={t("search.search")}
-            className="ms-2.5 size-12 min-h-0 cursor-pointer self-center rounded-full p-0 shadow-[0_6px_16px_rgb(184_148_91/.35)] hover:bg-gold-ink focus-visible:outline-offset-4 max-md:col-span-3 max-md:ms-0 max-md:mt-1.5 max-md:h-10 max-md:w-full max-md:gap-1.5 max-md:rounded-lg max-md:text-[12px] max-md:shadow-none">
-            <Search className="size-[18px] max-md:size-4" /><span className="md:hidden">{t("search.search")}</span>
-          </Button>
-        ) : (
-          <Button type="submit" variant="gold" className="ms-2.5 h-16 w-[74px] self-center rounded-lg max-md:ms-0 max-md:mt-2 max-md:h-[50px] max-md:w-full" aria-label={t("search.search")}>
-            <Search className="size-5" /><span className="md:hidden">{t("search.search")}</span>
-          </Button>
-        )}
+        {/* Desktop: icon only, no box. Mobile: compact full-width button under the fields. */}
+        <Button type="submit" variant="ghost" aria-label={t("search.search")}
+          className="ms-3 size-12 min-h-0 self-center rounded-full p-0 text-gold hover:text-gold hover:opacity-80 max-md:col-span-3 max-md:ms-0 max-md:h-10 max-md:w-full max-md:gap-1.5 max-md:rounded-lg max-md:bg-gold max-md:text-[12px] max-md:text-white max-md:hover:text-white">
+          <Search className="size-5 max-md:size-4" /><span className="md:hidden">{t("search.search")}</span>
+        </Button>
       </div>
       {errorKey && <p role="alert" className="mt-2 px-1 text-[11px] font-semibold text-error">{t(errorKey)}</p>}
     </form>

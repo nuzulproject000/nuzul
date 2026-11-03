@@ -53,7 +53,7 @@ export function DataTable<T>({ rows, cols, empty, rowKey, caption }: { rows: T[]
       <table className="w-full min-w-[720px] border-collapse text-[12px]">
         <caption className="sr-only">{caption}</caption>
         <thead><tr className="border-b border-line bg-soft/50">{cols.map((c) => <th key={c.head} scope="col" className={cn("px-4 py-3 text-start text-[10px] font-bold tracking-[0.08em] text-ink-muted uppercase", c.className)}>{c.head}</th>)}</tr></thead>
-        <tbody>{rows.map((r) => <tr key={rowKey(r)} className="border-b border-line last:border-0 hover:bg-soft/30">{cols.map((c) => <td key={c.head} className={cn("px-4 py-3 align-middle text-charcoal", c.className)}>{c.cell(r)}</td>)}</tr>)}</tbody>
+        <tbody>{rows.map((r) => <tr key={rowKey(r)} className="border-b border-line last:border-0 hover:opacity-80">{cols.map((c) => <td key={c.head} className={cn("px-4 py-3 align-middle text-charcoal", c.className)}>{c.cell(r)}</td>)}</tr>)}</tbody>
       </table>
     </div>
   );

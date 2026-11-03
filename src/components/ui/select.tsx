@@ -15,7 +15,7 @@ function Select({ value, onValueChange, options, placeholder, className, ariaLab
         <SelectPrimitive.Content position="popper" sideOffset={4} className="z-[200] max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden border border-line bg-paper shadow-lift">
           <SelectPrimitive.Viewport className="p-1">
             {options.map((o) => (
-              <SelectPrimitive.Item key={o.value} value={o.value} className="relative flex cursor-pointer select-none items-center rounded-sm py-2.5 ps-8 pe-3 text-sm text-navy outline-none data-[highlighted]:bg-soft">
+              <SelectPrimitive.Item key={o.value} value={o.value} className="relative flex cursor-pointer select-none items-center rounded-sm py-2.5 ps-8 pe-3 text-sm text-navy outline-none data-[highlighted]:text-gold focus-visible:bg-soft">
                 <SelectPrimitive.ItemIndicator className="absolute start-2"><Check className="size-4 text-gold" /></SelectPrimitive.ItemIndicator>
                 <SelectPrimitive.ItemText>{o.label}</SelectPrimitive.ItemText>
               </SelectPrimitive.Item>

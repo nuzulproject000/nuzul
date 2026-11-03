@@ -1,6 +1,8 @@
 /* Homepage — structure follows spec §75 exactly (15 blocks, in order). */
 import { useIsGuest } from "@/stores/session.store";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useMarquee } from "@/hooks/use-marquee";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, BadgeCheck, Crosshair, Heart, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,9 @@ export default function HomePage() {
   const setSearch = useSearch((s) => s.set);
   const recent = useSearch((s) => s.recent);
   const { data: categories } = useCategories();
+  const activeCats = categories?.filter((c) => c.active) ?? [];
+  const catRow = useRef<HTMLDivElement>(null);
+  const marquee = useMarquee(catRow, { enabled: activeCats.length > 0 });
   const { data: destinations } = useDestinations();
   const { data: profile } = useMatchProfile();
   const isGuest = useIsGuest();
@@ -61,15 +66,17 @@ export default function HomePage() {
         {/* Readability overlay: darker on the text side (flips in RTL), plus a floor for the bottom row */}
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-navy/85 via-navy/45 to-navy/5 rtl:bg-gradient-to-l max-md:bg-gradient-to-t max-md:from-navy/90 max-md:via-navy/50 max-md:to-navy/10 rtl:max-md:bg-gradient-to-t" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-gradient-to-t from-navy/45 to-transparent max-md:hidden" />
+        {/* Top shade keeps the transparent header readable on bright skies */}
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[calc(var(--header-h)+80px)] bg-gradient-to-b from-navy/55 to-transparent" />
 
-        <div className="container-page flex flex-col justify-center py-12 text-white max-md:justify-end max-md:pt-16 max-md:pb-[calc(66px+env(safe-area-inset-bottom)+28px)]">
+        <div className="container-page flex flex-col justify-center pt-[calc(var(--header-h)+clamp(32px,4vh,64px))] pb-[clamp(40px,6vh,88px)] text-white max-md:justify-end max-md:pt-[calc(var(--header-h)+40px)] max-md:pb-[calc(56px+env(safe-area-inset-bottom)+28px)]">
           <div className="max-w-[min(760px,62%)] max-lg:max-w-[600px] max-md:max-w-none">
             <span className="eyebrow hero-rise text-sand max-md:mb-2.5 max-md:text-[10px]">{t("home.eyebrow")}</span>
             <h1 id="hero-title" className="home-hero-title hero-rise mb-[clamp(16px,1.6vw,32px)] text-white [text-wrap:balance]" style={rise(80)}>{t("home.title1")}<br />{t("home.title2")}</h1>
             <p className="home-hero-lead hero-rise max-w-[36ch] text-white/85" style={rise(160)}>{t("home.lead")}</p>
             <div className="hero-rise mt-[clamp(20px,2vw,36px)] flex flex-wrap gap-3 max-md:gap-2.5" style={rise(240)}>
               <Button asChild variant="gold" className={HERO_BTN}><Link to="/search">{t("home.explore")} <ArrowRight className="rtl:rotate-180" /></Link></Button>
-              <Button variant="outline" className={cn(HERO_BTN, "border-white/45 bg-white/10 text-white backdrop-blur-md hover:bg-white/20")} onClick={() => document.getElementById("match")?.scrollIntoView({ behavior: "smooth" })}>{t("home.findMatch")}</Button>
+              <Button variant="outline" className={cn(HERO_BTN, "border-white/45 bg-white/10 text-white backdrop-blur-md hover:opacity-80")} onClick={() => document.getElementById("match")?.scrollIntoView({ behavior: "smooth" })}>{t("home.findMatch")}</Button>
             </div>
             <div className="hero-rise mt-[clamp(28px,3.4vw,64px)] flex items-center gap-3.5 max-md:mt-6" style={rise(320)}>
               <div className="flex">{["AM", "RS", "LN"].map((x, i) => <span key={x} className={cn("grid size-[30px] place-items-center rounded-full border-2 border-white/80 bg-sand text-[8px] text-navy max-md:size-[26px]", i && "-ms-2")}>{x}</span>)}</div>
@@ -77,7 +84,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <small className="absolute end-[max(24px,calc((100%-1400px)/2))] bottom-6 text-[11px] text-white/80 [text-shadow:0_1px_3px_rgb(0_0_0/.4)] max-md:end-4 max-md:top-4 max-md:bottom-auto max-md:text-[10px]">{t("home.heroCaption")}</small>
+        <small className="absolute end-[max(24px,calc((100%-1400px)/2))] bottom-6 text-[11px] text-white/80 [text-shadow:0_1px_3px_rgb(0_0_0/.4)] max-md:end-4 max-md:top-[calc(var(--header-h)+12px)] max-md:bottom-auto max-md:text-[10px]">{t("home.heroCaption")}</small>
       </section>
 
       {/* 3 · Search — its own section under the hero — 4 · Questionnaire attached directly beneath */}
@@ -90,16 +97,18 @@ export default function HomePage() {
           <small className="text-[10px] font-bold tracking-[0.16em] uppercase">{t("home.refine")}</small>
           <span className="h-px flex-1 bg-gradient-to-r from-gold/60 to-transparent rtl:bg-gradient-to-l" />
         </div>
-        <div className="container-wide"><Questionnaire /></div>
+        <Questionnaire />
       </div>
 
       {/* 5 · Category navigation */}
       <section className="container-page pt-24 max-md:pt-16">
         <SectionHeading eyebrow={t("home.categories.eyebrow")} title={t("home.categories.title")} />
-        <div className="scrollbar-none flex gap-2.5 overflow-x-auto pb-2">
-          {categories?.filter((c) => c.active).map((c) => { const Icon = categoryIcon(c.name); return (
-            <button key={c.id} type="button" onClick={() => goCategory(c.name)} className="flex shrink-0 items-center gap-2 rounded-full border border-line py-2.5 ps-2.5 pe-4 text-[12px] text-navy hover:bg-soft/60">
-              <span className="grid size-[29px] place-items-center rounded-full bg-soft"><Icon className="size-3.5" /></span>{c.name}
+        {/* Icon + label only (no pill). On mobile the row drifts slowly; touch/drag pauses it. */}
+        <div ref={catRow} className="scrollbar-none flex gap-7 overflow-x-auto pb-2 max-md:-me-4 max-md:gap-6 max-md:pe-4">
+          {[...activeCats, ...(marquee ? activeCats : [])].map((c, i) => { const Icon = categoryIcon(c.name); const clone = i >= activeCats.length; return (
+            <button key={`${c.id}-${i}`} type="button" onClick={() => goCategory(c.name)} aria-hidden={clone || undefined} tabIndex={clone ? -1 : undefined}
+              className="flex shrink-0 items-center gap-2 py-2 text-[13px] font-semibold text-navy transition-opacity duration-150 hover:opacity-80">
+              <Icon className="size-[18px] text-gold" />{c.name}
             </button>
           ); })}
         </div>
@@ -111,16 +120,16 @@ export default function HomePage() {
         <div className="grid grid-cols-[1.2fr_.8fr_.8fr] grid-rows-[240px_240px] gap-4 max-md:-me-4 max-md:flex max-md:overflow-x-auto max-md:scrollbar-none">
           {destinations?.slice(0, 4).map((d, i) => (
             <button key={d.city} type="button" onClick={() => goCity(d.city)} className={cn("group relative cursor-pointer overflow-hidden text-start focus-visible:outline-offset-[-3px] max-md:h-80 max-md:flex-[0_0_78%]", i === 0 && "row-span-2", i === 3 && "col-span-2")}>
-              <img src={d.image} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+              <img src={d.image} alt="" loading="lazy" className="h-full w-full object-cover" />
               <span className="absolute inset-0 bg-gradient-to-b from-transparent from-50% to-navy/75" />
               <span className="absolute start-5 bottom-5 z-10 flex flex-col text-white"><b className="text-lg">{d.city}</b><small className="mt-1 opacity-80">{d.detail}</small></span>
-              <i aria-hidden className="absolute end-5 bottom-5 z-10 text-white drop-shadow-[0_1px_4px_rgb(0_0_0/.55)] transition-transform duration-200 group-hover:translate-x-1 group-focus-visible:translate-x-1 rtl:group-hover:-translate-x-1 rtl:group-focus-visible:-translate-x-1"><ArrowRight className="size-6 rtl:rotate-180" /></i>
+              <i aria-hidden className="absolute end-5 bottom-5 z-10 text-white drop-shadow-[0_1px_4px_rgb(0_0_0/.55)]"><ArrowRight className="size-6 rtl:rotate-180" /></i>
             </button>
           ))}
         </div>
         <div className="mt-4 grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
           {destinations?.slice(4).map((d) => (
-            <button key={d.city} type="button" onClick={() => goCity(d.city)} className="flex items-center gap-3 border border-line bg-paper p-2 text-start hover:bg-soft/50">
+            <button key={d.city} type="button" onClick={() => goCity(d.city)} className="flex items-center gap-3 border border-line bg-paper p-2 text-start hover:opacity-80">
               <img src={d.image} alt="" loading="lazy" className="h-[52px] w-16 object-cover" /><span><b className="block text-[13px] text-navy">{d.city}</b><small className="text-[11px] text-ink-muted">{d.detail}</small></span>
             </button>
           ))}
@@ -175,7 +184,7 @@ export default function HomePage() {
         <div className="grid grid-cols-6 gap-3 max-xl:grid-cols-3 max-md:grid-cols-2">
           {([["Romantic", photos.sunset], ["Business", photos.city], ["Family", photos.pool], ["Spa", photos.lounge], ["Hotels with views", photos.coast], ["Hotels near landmarks", photos.villa]] as const).map(([c, img]) => (
             <button key={c} type="button" onClick={() => goCategory(c)} className="group relative aspect-[3/4] overflow-hidden text-start">
-              <img src={img} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+              <img src={img} alt="" loading="lazy" className="h-full w-full object-cover" />
               <span className="absolute inset-0 bg-gradient-to-b from-transparent from-45% to-navy/80" />
               <span className="absolute inset-x-3.5 bottom-3.5 z-10 text-[13px] font-bold text-white">{c}</span>
             </button>
