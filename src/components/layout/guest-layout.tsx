@@ -14,7 +14,7 @@ export function GuestLayout() {
   const { pathname } = useLocation();
   const footer = !NO_FOOTER.some((p) => pathname.startsWith(p));
   return (
-    <div className="min-h-screen overflow-x-clip max-md:pb-[66px]">
+    <div className="min-h-screen overflow-x-clip max-md:pb-[calc(66px+env(safe-area-inset-bottom))]">
       <a href="#main" className="fixed start-2 top-2 z-[400] -translate-y-[300%] bg-navy px-3.5 py-2.5 text-xs text-white focus:translate-y-0">{t("nav.skip")}</a>
       <DemoStrip />
       <Header />

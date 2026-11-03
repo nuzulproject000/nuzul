@@ -1,8 +1,9 @@
 /* Global header (§3) — role-aware: visitors see sign-in, guests see their travel areas,
  * hosts and admins see a link back to their own workspace. */
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Bell, ChevronDown, Globe2, LayoutDashboard, LogIn, Search, User } from "lucide-react";
+import { Bell, Globe2, LayoutDashboard, LogIn, Search, User } from "lucide-react";
 import { Logo } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/overlay";
@@ -11,6 +12,19 @@ import { usePreferences } from "@/stores/preferences.store";
 import { roleHome, useSession } from "@/stores/session.store";
 import { useAuthGate } from "@/components/auth/auth-gate";
 import { cn, initials } from "@/lib/utils";
+import { CurrencyMenu } from "@/components/preferences/currency-menu";
+
+/** True once the page has scrolled — drives the header shadow. */
+function useScrolled(threshold = 4) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > threshold);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, [threshold]);
+  return scrolled;
+}
 
 export function Header() {
   const { t } = useTranslation();
@@ -33,10 +47,11 @@ export function Header() {
   ].filter((n) => !n.guest || !user || isGuest);
   const go = (to: string) => gate("account", () => navigate(to), to);
   const signOutNow = () => { signOut(); navigate("/", { replace: true }); };
+  const scrolled = useScrolled();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-sand/30 bg-ivory/95 backdrop-blur-md">
-      <div className="mx-auto flex h-[78px] max-w-[1440px] items-center justify-between gap-4 px-12 max-lg:px-6 max-md:h-16 max-md:px-4">
+    <header className={cn("sticky top-0 z-40 border-b bg-ivory transition-[box-shadow,border-color] duration-200", scrolled ? "border-line/70 shadow-[0_6px_24px_rgb(15_28_46/.08)]" : "border-sand/30")}>
+      <div className="mx-auto flex h-[calc(var(--header-h)-1px)] max-w-[1440px] items-center justify-between gap-4 px-12 max-lg:px-6 max-md:px-4">
         <Link to="/" aria-label="Nuzul home"><Logo /></Link>
         <nav aria-label="Main" className="flex gap-9 max-lg:hidden">
           {nav.map((n) => n.guest && !user ? (
@@ -47,10 +62,10 @@ export function Header() {
             </NavLink>
           ))}
         </nav>
-        <div className="flex items-center gap-5 max-md:gap-3">
+        <div className="flex items-center gap-4 max-md:gap-3">
           <Link to="/search" className="text-charcoal max-md:hidden" aria-label={t("nav.search")}><Search className="size-[17px]" /></Link>
-          <button type="button" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="flex items-center gap-1.5 text-xs font-semibold text-charcoal max-lg:hidden" aria-label="Switch language"><Globe2 className="size-[17px]" /> {t("nav.language")}</button>
-          <button type="button" onClick={() => setCurrency(currency === "EGP" ? "USD" : "EGP")} className="flex items-center gap-1 text-xs font-semibold text-charcoal max-md:hidden" aria-label={`${t("nav.currency")}: ${currency}`}>{currency} <ChevronDown className="size-3.5" /></button>
+          <button type="button" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold text-charcoal transition-colors duration-150 hover:bg-soft/70 hover:text-navy max-lg:hidden" aria-label="Switch language"><Globe2 className="size-[17px]" /> {t("nav.language")}</button>
+          <CurrencyMenu className="max-md:hidden" />
           {!user && <Link to="/auth/sign-up?role=HOST" className="border-b border-gold py-2 text-xs font-semibold text-charcoal max-lg:hidden">{t("nav.listHotel")}</Link>}
           {user && !isGuest && <Button size="sm" variant="outline" onClick={() => navigate(roleHome(user.role))} className="max-md:hidden"><LayoutDashboard /> {t(user.role === "HOST" ? "nav.hostDashboard" : "nav.adminConsole")}</Button>}
           {user && (
@@ -61,8 +76,8 @@ export function Header() {
           )}
           {!user && <Button size="sm" onClick={() => navigate(`/auth/sign-in?next=${encodeURIComponent(loc.pathname + loc.search)}`)} className="max-md:hidden"><LogIn /> {t("nav.signIn")}</Button>}
           <DropdownMenu>
-            <DropdownMenuTrigger aria-label={t("nav.account")} className={cn("grid size-[38px] place-items-center rounded-full text-xs font-bold max-md:size-[34px]", user ? "bg-navy text-white" : "border border-line bg-paper text-navy")}>
-              {user ? initials(user.name) : <User className="size-4" />}
+            <DropdownMenuTrigger aria-label={t("nav.account")} className={cn("grid size-[38px] cursor-pointer place-items-center rounded-full text-xs font-bold transition-colors duration-200 max-md:size-[34px]", user ? "bg-navy text-white hover:bg-navy/85" : "text-navy hover:bg-soft data-[state=open]:bg-soft")}>
+              {user ? initials(user.name) : <User className="size-[18px]" />}
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {user ? <DropdownMenuLabel><span className="flex flex-col"><span>{user.name}</span><small className="text-[10px] font-normal text-ink-muted">{t(`auth.role.${user.role}`)} · {user.email}</small></span></DropdownMenuLabel> : <DropdownMenuLabel>{t("nav.visitor")}</DropdownMenuLabel>}

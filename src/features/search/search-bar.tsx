@@ -64,21 +64,26 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
   const onInvalid = () => setOpen(errors.destination ? "where" : "when");
 
   const range: DateRange = { from: parseISO(s.checkIn), to: parseISO(s.checkOut) };
-  const fieldCls = (k: string) => cn("relative flex flex-col justify-center rounded-md border-e border-line px-6 text-start max-md:min-h-[62px] max-md:border-e-0 max-md:border-b max-md:px-3.5", open === k && "bg-ivory");
+  const home = !compact;
+  const fieldCls = (k: string) => home
+    ? cn("relative flex min-w-0 cursor-pointer flex-col justify-center rounded-md border-e border-line px-6 text-start transition-colors duration-150 hover:bg-ivory/80 focus-within:bg-ivory max-lg:px-4 max-md:min-h-[52px] max-md:rounded-none max-md:px-2 max-md:first:ps-2.5", open === k && "bg-ivory")
+    : cn("relative flex flex-col justify-center rounded-md border-e border-line px-6 text-start max-md:min-h-[62px] max-md:border-e-0 max-md:border-b max-md:px-3.5", open === k && "bg-ivory");
+  const labelCls = cn("text-[10px] font-bold tracking-[0.12em] text-gold uppercase", home && "max-md:truncate max-md:text-[10px] max-md:tracking-[0.08em]");
+  const valueCls = cn("mt-1.5 truncate text-[13px] font-semibold text-navy", home && "max-md:mt-1 max-md:text-[12px]");
   const errorKey = errors.destination?.message ?? errors.checkOut?.message;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)} role="search" aria-label={t("nav.search")} className={cn("relative z-30 mx-auto max-w-[1280px]", compact ? "" : "-mt-10 max-lg:mx-6 max-md:mx-4 max-md:-mt-11")} noValidate>
-      <div className={cn("grid grid-cols-[1.4fr_1.1fr_1fr_auto] bg-paper p-2.5 max-md:flex max-md:flex-col max-md:p-2", compact ? "min-h-[72px] shadow-[0_6px_20px_rgb(15_28_46/.08)]" : "min-h-[88px] shadow-lift")}>
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} role="search" aria-label={t("nav.search")} className={cn("relative z-30 mx-auto max-w-[1280px]", home && "w-full")} noValidate>
+      <div className={cn("grid grid-cols-[1.4fr_1.1fr_1fr_auto] bg-paper p-2.5", compact ? "min-h-[72px] shadow-[0_6px_20px_rgb(15_28_46/.08)] max-md:flex max-md:flex-col max-md:p-2" : "min-h-[76px] border border-line/70 shadow-[0_10px_30px_rgb(15_28_46/.07)] max-md:min-h-0 max-md:grid-cols-3 max-md:p-1.5")}>
         {/* Where */}
         <Popover open={open === "where"} onOpenChange={(o) => setOpen(o ? "where" : "")}>
           <PopoverAnchor asChild>
-            <div className={fieldCls("where")}>
-              <label htmlFor="sb-where" className="text-[10px] font-bold tracking-[0.12em] text-gold uppercase">{t("search.where")}</label>
+            <div className={fieldCls("where")} onClick={home ? () => document.getElementById("sb-where")?.focus() : undefined}>
+              <label htmlFor="sb-where" className={cn(labelCls, home && "cursor-pointer")}>{t("search.where")}</label>
               <Controller control={control} name="destination" render={({ field }) => (
                 <input id="sb-where" {...field} value={query} autoComplete="off" placeholder={t("search.wherePh")} aria-autocomplete="list" aria-expanded={open === "where"} aria-invalid={!!errors.destination}
                   onFocus={() => setOpen("where")} onChange={(e) => { setQuery(e.target.value); field.onChange(e.target.value); setOpen("where"); }}
-                  className="mt-1.5 w-full truncate bg-transparent text-[13px] font-semibold text-navy outline-none placeholder:text-ink-muted/70" />
+                  className={cn(valueCls, "w-full bg-transparent outline-none placeholder:text-ink-muted/70", home && "cursor-pointer focus:cursor-text")} />
               )} />
             </div>
           </PopoverAnchor>
@@ -107,8 +112,8 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
         <Popover open={open === "when"} onOpenChange={(o) => setOpen(o ? "when" : "")}>
           <PopoverAnchor asChild>
             <button type="button" className={fieldCls("when")} onClick={() => setOpen(open === "when" ? "" : "when")} aria-expanded={open === "when"}>
-              <span className="text-[10px] font-bold tracking-[0.12em] text-gold uppercase">{t("search.when")}</span>
-              <span className="mt-1.5 truncate text-[13px] font-semibold text-navy">{whenLabel}</span>
+              <span className={labelCls}>{t("search.when")}</span>
+              <span className={valueCls}>{whenLabel}</span>
             </button>
           </PopoverAnchor>
           <PopoverContent className="w-[min(680px,calc(100vw-32px))]" align="center">
@@ -156,8 +161,8 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
         <Popover open={open === "who"} onOpenChange={(o) => setOpen(o ? "who" : "")}>
           <PopoverAnchor asChild>
             <button type="button" className={cn(fieldCls("who"), "border-e-0")} onClick={() => setOpen(open === "who" ? "" : "who")} aria-expanded={open === "who"}>
-              <span className="text-[10px] font-bold tracking-[0.12em] text-gold uppercase">{t("search.who")}</span>
-              <span className="mt-1.5 truncate text-[13px] font-semibold text-navy">{whoLabel}</span>
+              <span className={labelCls}>{t("search.who")}</span>
+              <span className={valueCls}>{whoLabel}</span>
             </button>
           </PopoverAnchor>
           <PopoverContent className="w-[min(360px,calc(100vw-32px))]" align="end">
@@ -170,9 +175,16 @@ export function SearchBar({ compact = false, onSubmitted }: { compact?: boolean;
           </PopoverContent>
         </Popover>
 
-        <Button type="submit" variant="gold" className="ms-2.5 h-16 w-[74px] self-center rounded-lg max-md:ms-0 max-md:mt-2 max-md:h-[50px] max-md:w-full" aria-label={t("search.search")}>
-          <Search className="size-5" /><span className="md:hidden">{t("search.search")}</span>
-        </Button>
+        {home ? (
+          <Button type="submit" variant="gold" aria-label={t("search.search")}
+            className="ms-2.5 size-12 min-h-0 cursor-pointer self-center rounded-full p-0 shadow-[0_6px_16px_rgb(184_148_91/.35)] hover:bg-gold-ink focus-visible:outline-offset-4 max-md:col-span-3 max-md:ms-0 max-md:mt-1.5 max-md:h-10 max-md:w-full max-md:gap-1.5 max-md:rounded-lg max-md:text-[12px] max-md:shadow-none">
+            <Search className="size-[18px] max-md:size-4" /><span className="md:hidden">{t("search.search")}</span>
+          </Button>
+        ) : (
+          <Button type="submit" variant="gold" className="ms-2.5 h-16 w-[74px] self-center rounded-lg max-md:ms-0 max-md:mt-2 max-md:h-[50px] max-md:w-full" aria-label={t("search.search")}>
+            <Search className="size-5" /><span className="md:hidden">{t("search.search")}</span>
+          </Button>
+        )}
       </div>
       {errorKey && <p role="alert" className="mt-2 px-1 text-[11px] font-semibold text-error">{t(errorKey)}</p>}
     </form>
