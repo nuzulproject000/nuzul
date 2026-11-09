@@ -21,7 +21,7 @@ export function GuestLayout() {
       {hero && <SuspendedBanner />}
       <Header />
       {!hero && <SuspendedBanner />}
-      <main id="main"><Outlet /></main>
+      <main id="main" className="min-h-[100svh]"><Outlet /></main>
       {footer && <Footer />}
       <MobileNav />
       <WhyMatchDialog />
@@ -35,7 +35,7 @@ export function FocusLayout() {
   return (
     <div className="min-h-screen">
       <SuspendedBanner />
-      <main id="main"><Outlet /></main>
+      <main id="main" className="min-h-[100svh]"><Outlet /></main>
       <WhyMatchDialog />
       <AuthPromptDialog />
     </div>
