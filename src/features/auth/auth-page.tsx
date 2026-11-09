@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 type Mode = "sign-in" | "sign-up" | "verify" | "forgot" | "sent" | "reset" | "reset-done" | "expired";
 const MODES: Mode[] = ["sign-in", "sign-up", "verify", "forgot", "sent", "reset", "reset-done", "expired"];
-const HERO = "https://images.unsplash.com/photo-1694968433606-df475600d7b6?auto=format&fit=crop&w=1400&q=85";
+const HERO = "/images/city.webp";
 const GUEST_ONLY = ["/account", "/trips", "/wishlists", "/messages", "/profile", "/book", "/booking"];
 
 /** Where to go after signing in: the requested page if this role may open it, otherwise the role's home. */

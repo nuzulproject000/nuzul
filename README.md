@@ -82,6 +82,36 @@ docs/             architecture, requirements checklist, QA report
 2. Set `VITE_USE_MOCKS=false` and `VITE_API_BASE_URL=https://…/v1` (see `.env.example`).
 3. Nothing in `features/` or `components/` changes; the mock server is lazy-loaded and dropped from the bundle.
 
+## Image optimization
+
+All photography is self-hosted (no runtime requests to Unsplash) and converted to WebP.
+Files live in `public/images/` (served as `/images/<name>.webp`); the logo is in `src/assets/`.
+
+| Image | Original (JPG) | WebP | Saved |
+|---|---|---|---|
+| hero | 551.0 KB | 381.9 KB | 30.7% |
+| pool | 341.6 KB | 273.8 KB | 19.8% |
+| coast | 761.9 KB | 717.7 KB | 5.8% |
+| room | 205.7 KB | 140.6 KB | 31.6% |
+| lounge | 225.6 KB | 186.0 KB | 17.6% |
+| villa | 499.4 KB | 397.6 KB | 20.4% |
+| beach | 234.4 KB | 182.4 KB | 22.2% |
+| sunset | 522.4 KB | 446.1 KB | 14.6% |
+| city | 754.3 KB | 675.1 KB | 10.5% |
+| **Total (9 photos)** | **4,096.3 KB** | **3,401.2 KB** | **17.0%** |
+
+Notes:
+
+- Converted with the online tool OmniShift (https://omnishiftt.vercel.app/) using its default settings (the tool offers no quality option).
+- `src/assets/nuzul-mark.jpg` (60.1 KB) → `nuzul-mark.webp` (15.0 KB).
+- `public/favicon.png` (695.1 KB) is kept as PNG for browser compatibility; `favicon.webp` (15.0 KB) was generated for comparison only.
+- The home hero is now a single 1800px source; the previous Unsplash width variants (`w=1200…3400`) no longer apply.
+- Map tiles (OpenStreetMap / Leaflet) are third-party and not converted.
+- Photos are from Unsplash.
+
+To re-download the original JPGs (they are not served by the app), run
+`node scripts/download-images.mjs`; they are written to `originals/`, outside `public/`.
+
 ## Design source
 
 Visual reference: Figma Make “Nuzul Hotel Discovery Platform — v2 (Spec-complete)”
