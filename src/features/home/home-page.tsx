@@ -22,8 +22,8 @@ import { cn } from "@/lib/utils";
 /** Hero entrance stagger (CSS-only; disabled by prefers-reduced-motion). */
 const rise = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
 const HERO_BTN = "min-h-12 px-6 text-[13px] min-[1800px]:min-h-14 min-[1800px]:px-8 min-[1800px]:text-[15px] max-md:min-h-10 max-md:px-4 max-md:text-[12px]";
-/** Larger hero sources for wide screens (same photo, Unsplash width parameter). */
-const heroSrcSet = [1200, 1800, 2600, 3400].map((w) => `${photos.hero.replace(/w=\d+/, `w=${w}`)} ${w}w`).join(", ");
+//** Local hero (1800px wide); no responsive width variants since the image is self-hosted. */
+const heroSrcSet = `${photos.hero} 1800w`;
 
 function HotelRow({ kind, columns = 4 }: { kind: CollectionKind; columns?: 3 | 4 }) {
   const { data, isLoading, error, refetch } = useCollection(kind);

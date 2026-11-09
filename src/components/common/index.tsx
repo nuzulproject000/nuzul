@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/controls";
 import { cn } from "@/lib/utils";
-import logoMark from "@/assets/nuzul-mark.jpg";
+import logoMark from "@/assets/nuzul-mark.webp";
 
 export function Logo({ light = false, compact = false }: { light?: boolean; compact?: boolean }) {
   return (
