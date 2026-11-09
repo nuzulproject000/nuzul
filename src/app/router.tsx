@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter, Navigate, Outlet, ScrollRestoration, type RouteObject } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, ScrollRestoration, useLocation, type RouteObject } from "react-router-dom";
+import { HERO_ROUTES } from "@/components/layout/header";
 import { FocusLayout, GuestLayout } from "@/components/layout/guest-layout";
 import { HostLayout } from "@/features/host/host-layout";
 import { AdminLayout } from "@/features/admin/admin-layout";
@@ -12,7 +13,17 @@ const page = (loader: () => Promise<{ default: React.ComponentType }>) => {
   const C = lazy(loader);
   return <Suspense fallback={<PageFallback />}><C /></Suspense>;
 };
-function PageFallback() { return <div className="container-page py-16" aria-busy="true"><div className="skeleton h-10 w-1/3" /><div className="skeleton mt-6 h-64" /></div>; }
+/** Shown while a route's code loads. It always fills the first screen (100svh) so nothing below <main> — the footer —
+ * can show before the page itself; on hero routes it is the hero's own navy block, sitting under the transparent header. */
+function PageFallback() {
+  const { pathname } = useLocation();
+  if (HERO_ROUTES.includes(pathname)) return <div className="home-hero bg-navy" aria-busy="true" aria-hidden="true" />;
+  return (
+    <div className="container-page min-h-[100svh] py-16" aria-busy="true">
+      <div className="skeleton h-10 w-1/3" /><div className="skeleton mt-6 h-64" />
+    </div>
+  );
+}
 function Root({ children }: { children?: ReactNode }) { return <>{children ?? <Outlet />}<ScrollRestoration /><SessionEffects /></>; }
 
 /* Route map (§3, §60):

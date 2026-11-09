@@ -10,9 +10,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
     <title>Nuzul — Hotel Discovery</title>
+    <!-- First paint before the app's JS arrives: ivory page, or the navy hero block on the home route (100svh),
+         so nothing jumps and no footer shows first. Also start the hero photo right away, on the home route only. -->
+    <style>
+      html, body { background: #f8f5ef; margin: 0; }
+      .boot { min-height: 100svh; }
+      html[data-boot="hero"] .boot { background: #0f1c2e; }
+    </style>
+    <script>
+      if (location.pathname === "/") {
+        document.documentElement.setAttribute("data-boot", "hero");
+        var l = document.createElement("link");
+        l.rel = "preload"; l.as = "image"; l.type = "image/webp"; l.href = "/images/hero.webp"; l.setAttribute("fetchpriority", "high");
+        document.head.appendChild(l);
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="boot" aria-hidden="true"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -134,15 +134,14 @@
     .home-hero-title { font-size: clamp(2rem, 8.4vw, 2.6rem); }
     .home-hero-lead { font-size: 0.8125rem; }
   }
-  .hero-rise { animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0ms); }
-  .hero-settle { animation: hero-settle 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  /* First paint: one short fade (180ms) and nothing that delays the first visible state. Off for reduced motion (below). */
+  .hero-rise, .hero-settle { animation: hero-fade 180ms ease-out both; }
   .scrollbar-none { scrollbar-width: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .skeleton { background: linear-gradient(90deg, #ece6da 0%, #f6f1e8 50%, #ece6da 100%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
 }
 
-@keyframes hero-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes hero-settle { from { transform: scale(1.04); } to { transform: none; } }
+@keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* Leaflet: keep the map under sticky headers and brand the price markers */
