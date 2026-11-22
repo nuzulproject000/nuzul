@@ -28,12 +28,12 @@ export function MatchRing({ score, size = 18, stroke = 2.5, dark = false, dot = 
   );
 }
 
-/** Pill used on cards, comparisons, lists. Distinct from star ratings by design. */
+/** Match badge used on cards, comparisons, lists: ring + "NN% Match" (+ "Why?"), with no container box. Distinct from star ratings by design. */
 export function MatchPill({ score, hotelId, dark = false, className }: { score: number; hotelId?: string; dark?: boolean; className?: string }) {
   const { t } = useTranslation();
   const openWhy = useUi((s) => s.openWhy);
   return (
-    <span title={t("match.personal")} className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border py-[5px] ps-[7px] pe-1.5 text-[11px]", dark ? "border-sand/35 bg-sand/12 text-sand" : "border-gold/40 bg-sand/18 text-gold-ink", !hotelId && "pe-2.5", className)}>
+    <span title={t("match.personal")} className={cn("inline-flex items-center gap-1.5 whitespace-nowrap text-[11px]", dark ? "text-sand" : "text-gold-ink", className)}>
       <MatchRing score={score} size={16} stroke={2.4} dark={dark} />
       <b className="tracking-tight">{t("match.match", { score })}</b>
       {hotelId && (

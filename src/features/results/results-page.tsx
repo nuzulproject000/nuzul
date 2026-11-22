@@ -8,7 +8,7 @@ import { ArrowUpDown, CalendarDays, Filter, LayoutDashboard, List, Map as MapIco
 import type { SortKey } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { CardSkeleton, Chip, EmptyState, ErrorState, Pagination } from "@/components/common";
+import { Chip, EmptyState, ErrorState, Pagination } from "@/components/common";
 import { HotelCard } from "@/components/hotel/hotel-card";
 import { SearchBar } from "@/features/search/search-bar";
 import { useCategories, useCompareHotels, useFlexibleDates, useHotelSearch, useSplitStays } from "@/hooks/queries";
@@ -20,6 +20,7 @@ import { nightsBetween } from "@/lib/dates";
 import { categoryIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { FiltersSheet } from "./filters-sheet";
+import { CategoryItemsSkeleton, MapSkeleton, ResultsGridSkeleton, resultsGridClass } from "./results-skeleton";
 import { EMPTY_FILTERS, toSearchParams, useResultFilters } from "./use-result-filters";
 
 const ResultsMap = lazy(() => import("./results-map").then((m) => ({ default: m.ResultsMap })));
@@ -65,6 +66,7 @@ export default function ResultsPage() {
     <div>
       <div className="bg-soft px-12 pt-8 pb-5 max-md:px-3 max-md:py-3.5"><SearchBar compact /></div>
       <nav aria-label={t("home.categories.title")} className="scrollbar-none flex gap-7 overflow-x-auto border-b border-line px-12 pt-3.5 max-md:gap-5 max-md:px-4">
+        {!categories && <CategoryItemsSkeleton />}
         {categories?.filter((c) => c.active).map((c) => { const Icon = categoryIcon(c.name); const on = filters.category === c.name; return (
           <button key={c.id} type="button" aria-pressed={on} onClick={() => setFilters({ ...filters, category: on ? undefined : c.name })} className={cn("flex shrink-0 flex-col items-center gap-1.5 border-b-2 pb-3 text-[11px]", on ? "border-navy text-navy" : "border-transparent text-ink-muted hover:opacity-80 hover:text-navy")}>
             <Icon className="size-[18px]" /><span>{c.name}</span>
@@ -110,16 +112,16 @@ export default function ResultsPage() {
           {isMonthly && <div className="mb-6 flex items-start gap-2.5 bg-soft px-4 py-3.5 text-[12px] leading-relaxed text-navy"><CalendarDays className="size-[18px] shrink-0 text-gold" /><span><b>{t("results.monthly")}</b> · {t("results.monthlyText")}</span></div>}
 
           {error ? <ErrorState title={t("results.error")} error={error} onRetry={() => void refetch()} />
-            : isLoading ? <div className={cn("grid gap-x-5 gap-y-9", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-md:grid-cols-1")}>{Array.from({ length: 4 }, (_, i) => <CardSkeleton key={i} />)}</div>
+            : isLoading ? <ResultsGridSkeleton view={view} />
               : items.length === 0 ? <EmptyState icon={<Search />} title={t("results.empty")} text={t("results.emptyText")} action={t("common.clearAll")} onAction={() => { setFilters(EMPTY_FILTERS); setArea(null); }} />
-                : <div className={cn("grid gap-x-5 gap-y-9 transition-opacity", isFetching && "opacity-60", view === "list" ? "grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1" : "grid-cols-2 max-md:grid-cols-1")}>
+                : <div className={cn(resultsGridClass(view), "transition-opacity", isFetching && "opacity-60")}>
                   {items.map((h) => <HotelCard key={h.id} hotel={h} nights={nights} monthly={isMonthly} showCompare highlighted={hover === h.id || selected === h.id} onHover={setHover} />)}
                 </div>}
           {data && !area && <Pagination page={data.page} totalPages={data.totalPages} onChange={(p) => { write({ page: p }, false); window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
         </section>
         {view !== "list" && (
           <aside className={cn("sticky top-[78px] h-[calc(100vh-78px)]", view === "split" && "max-lg:hidden", view === "map" && "h-[calc(100vh-230px)] max-md:h-[calc(100vh-260px)]")}>
-            <Suspense fallback={<div className="skeleton h-full" />}>
+            <Suspense fallback={<MapSkeleton />}>
               <ResultsMap focus={dest} hotels={items} hoverId={hover} selectedId={selected} onSelect={setSelected} onSearchArea={setArea} />
             </Suspense>
           </aside>
