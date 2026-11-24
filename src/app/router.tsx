@@ -5,13 +5,14 @@ import { FocusLayout, GuestLayout } from "@/components/layout/guest-layout";
 import { HostLayout } from "@/features/host/host-layout";
 import { AdminLayout } from "@/features/admin/admin-layout";
 import { RouteError } from "@/features/misc/route-error";
+import { SearchPageSkeleton } from "@/features/results/results-skeleton";
 import { RequireRole } from "./guards";
 import { SessionEffects } from "./session-effects";
 
 /* Route-level code splitting keeps the first load small (§69). */
-const page = (loader: () => Promise<{ default: React.ComponentType }>) => {
+const page = (loader: () => Promise<{ default: React.ComponentType }>, fallback: ReactNode = <PageFallback />) => {
   const C = lazy(loader);
-  return <Suspense fallback={<PageFallback />}><C /></Suspense>;
+  return <Suspense fallback={fallback}><C /></Suspense>;
 };
 /** Shown while a route's code loads. It always fills the first screen (100svh) so nothing below <main> — the footer —
  * can show before the page itself; on hero routes it is the hero's own navy block, sitting under the transparent header. */
@@ -77,7 +78,7 @@ export const routes: RouteObject[] = [
         element: <GuestLayout />,
         children: [
           { index: true, element: page(() => import("@/features/home/home-page")) },
-          { path: "search", element: page(() => import("@/features/results/results-page")) },
+          { path: "search", element: page(() => import("@/features/results/results-page"), <SearchPageSkeleton />) },
           { path: "hotels/*", element: page(() => import("@/features/hotel/hotel-page")) },
           { path: "compare", element: page(() => import("@/features/compare/compare-page")) },
           { path: "system", element: page(() => import("@/features/system/system-page")) },

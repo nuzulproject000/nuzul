@@ -142,6 +142,13 @@
 }
 
 @keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+/* Reusable skeleton (components/skeleton): cream base, thin beige border option, soft 1.4s sweep that follows
+   the reading direction. The reduced-motion rule below also stops it. */
+.skel { background-color: var(--soft); background-image: linear-gradient(90deg, transparent 42%, rgb(255 253 248 / .7) 50%, transparent 58%); background-size: 300% 100%; background-repeat: no-repeat; animation: skel-sweep 1.4s ease-in-out infinite; }
+.skel-box { border: 1px solid var(--line); }
+[dir="rtl"] .skel { animation-direction: reverse; }
+@keyframes skel-sweep { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; background-image: none; } }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* Leaflet: keep the map under sticky headers and brand the price markers */
